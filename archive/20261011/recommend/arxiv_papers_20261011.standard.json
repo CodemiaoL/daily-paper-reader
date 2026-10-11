@@ -1,0 +1,58 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-11T22:57:28.432249+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.06704v1",
+      "source": "arxiv",
+      "title": "Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings",
+      "abstract": "Dynamic World (DW) maps land use and land cover globally at 10 m from Sentinel-2 (S2) imagery, but only for cloud-free observations, which limits where and when surface water can be mapped. We use the DW water class as weak supervision for a Sentinel-1 (S1) synthetic aperture radar (SAR) model so that DW-like water maps can be produced for every S1 acquisition. Google's AlphaEarth Foundations (AEF) annual embedding supplies spatial context, while S1 backscatter supplies the acquisition-time observation. On 53 globally distributed scenes with independent annotations of 3 m PlanetScope imagery acquired within 48 h of the S1 overpass, the S1-only model already reaches a pooled water intersection over union (IoU) of 0.77, comparable to 0.75 for the operational OPERA DSWx-S1 product, and adding AEF raises it to 0.85. The fused model improves on the S1-only model on 44 of 53 scenes and exceeds OPERA on 48, and on the independent S1S2-Water benchmark it reaches 0.94, compared with 0.87 for OPERA. Optical land-cover products can thus provide scalable training labels for SAR surface water mapping.",
+      "authors": [
+        "Rohit Mukherjee",
+        "Frederick Policelli",
+        "Beth Tellman",
+        "TC Chakraborty",
+        "Jonathan Giezendanner",
+        "Jonathan A. Sullivan",
+        "Ning Sun"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-10-05T17:01:41+00:00",
+      "link": "https://arxiv.org/pdf/2610.06704v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "land use and land cover mapping",
+      "llm_evidence_cn": "土地利用与土地覆盖制图",
+      "llm_evidence": "土地利用与土地覆盖制图",
+      "canonical_evidence": "土地利用与土地覆盖制图",
+      "llm_tldr_en": "The paper extends Dynamic World land cover water mapping to Sentinel-1 SAR using weak supervision and AlphaEarth embeddings, enabling water maps for every acquisition including cloudy scenes.",
+      "llm_tldr_cn": "Dynamic World可基于Sentinel-2在10米分辨率全球制图土地利用与土地覆盖，但仅限无云观测，限制了地表水制图的范围与时机。本文以DW水体类别作为弱监督训练Sentinel-1合成孔径雷达模型，并用AlphaEarth嵌入提供空间上下文。在53个全球场景上，仅用S1的模型水体IoU达0.77，接近DW的0.75。该工作拓展了全天候土地覆盖制图与变化监测的能力。",
+      "llm_tldr": "Dynamic World可基于Sentinel-2在10米分辨率全球制图土地利用与土地覆盖，但仅限无云观测，限制了地表水制图的范围与时机。本文以DW水体类别作为弱监督训练Sentinel-1合成孔径雷达模型，并用AlphaEarth嵌入提供空间上下文。在53个全球场景上，仅用S1的模型水体IoU达0.77，接近DW的0.75。该工作拓展了全天候土地覆盖制图与变化监测的能力。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

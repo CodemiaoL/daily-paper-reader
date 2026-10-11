@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-10-11 <!--dpr-date:20261011-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/11/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings" data-sidebar-item="{&quot;title&quot;: &quot;Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;土地利用与土地覆盖制图&quot;}">Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings</a>
   * 2026-09-12 ~ 2026-10-11 <!--dpr-date:20260912-20261011-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/20260912-20261011/2609.27149v1-temporally-ordered-region-token-mamba-with-logit-space-diffusion-for-remote-sensing-change-detection" data-sidebar-item="{&quot;title&quot;: &quot;Temporally Ordered Region-Token Mamba with Logit-Space Diffusion for Remote Sensing Change Detection&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2609.27149v1-temporally-ordered-region-token-mamba-with-logit-space-diffusion-for-remote-sensing-change-detection&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;遥感变化检测方法，可用于土地覆盖分析&quot;}">Temporally Ordered Region-Token Mamba with Logit-Space Diffusion for Remote Sensing Change Detection</a>

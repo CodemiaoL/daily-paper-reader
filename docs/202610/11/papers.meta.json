@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-11",
+  "date": "2026-10-11",
+  "generated_at": "2026-10-11T22:58:12",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202610/11/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings",
+      "section": "quick",
+      "title_en": "Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings",
+      "authors": "Rohit Mukherjee, Frederick Policelli, Beth Tellman, TC Chakraborty, Jonathan Giezendanner, Jonathan A. Sullivan, Ning Sun",
+      "date": "2026-10-05",
+      "pdf": "https://arxiv.org/pdf/2610.06704v1",
+      "score": "6.0",
+      "evidence": "土地利用与土地覆盖制图",
+      "tldr": "Dynamic World 虽能全球十米制图地表水，但依赖 Sentinel-2 无云观测，云覆盖时难以持续监测。本文以 DW 水体类作弱监督，训练 Sentinel-1 合成孔径雷达水体模型，并引入 AlphaEarth 年度嵌入提供空间上下文，使每次过境都能生成类似水体图。在五十三个全球场景验证中，仅 Sentinel-1 模型交并比达零点七七，接近 OPERA 的零点七五；加入嵌入后升至零点八五，四十四个场景优于仅 Sentinel-1，四十八个场景超过 OPERA。在 S1S2-Water 基准达零点九四，高于 OPERA 的零点八七，表明光学土地覆盖产品可为 SAR 水体制图提供可扩展弱监督标签。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Dynamic World (DW) maps land use and land cover globally at 10 m from Sentinel-2 (S2) imagery, but only for cloud-free observations, which limits where and when surface water can be mapped. We use the DW water class as weak supervision for a Sentinel-1 (S1) synthetic aperture radar (SAR) model so that DW-like water maps can be produced for every S1 acquisition. Google's AlphaEarth Foundations (AEF) annual embedding supplies spatial context, while S1 backscatter supplies the acquisition-time observation. On 53 globally distributed scenes with independent annotations of 3 m PlanetScope imagery acquired within 48 h of the S1 overpass, the S1-only model already reaches a pooled water intersection over union (IoU) of 0.77, comparable to 0.75 for the operational OPERA DSWx-S1 product, and adding AEF raises it to 0.85. The fused model improves on the S1-only model on 44 of 53 scenes and exceeds OPERA on 48, and on the independent S1S2-Water benchmark it reaches 0.94, compared with 0.87 for OPERA. Optical land-cover products can thus provide scalable training labels for SAR surface water mapping.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

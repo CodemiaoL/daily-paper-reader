@@ -1,0 +1,25 @@
+{
+  "date": "20261011",
+  "date_label": "",
+  "generated_at": "2026-10-11 22:58:09 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.06704v1",
+      "route": "202610/11/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings",
+      "title": "Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "土地利用与土地覆盖制图",
+      "first_seen_at": "2026-10-11 22:58:09 UTC",
+      "updated_at": "2026-10-11 22:58:09 UTC"
+    }
+  ]
+}
