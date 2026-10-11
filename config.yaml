@@ -25,3 +25,58 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: transit-lucc
+      description: 帮我查找重大交通设施（如运河、铁路等）周边的土地利用变化（land use change）的相关研究论文
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: Land use
+          keyword_cn: 土地利用
+          query: t
+        - keyword: land use change
+          keyword_cn: 土地利用变化
+          query: land use change and its spatial patterns
+        - keyword: canal infrastructure
+          keyword_cn: 运河基础设施
+          query: impact of canal construction on surrounding land
+        - keyword: land cover change
+          keyword_cn: 土地覆盖变化
+          query: land cover change detection and analysis
+      intent_queries:
+        - query: >-
+            How does the construction of major transportation infrastructure such as canals and railways influence land
+            use change in adjacent regions?
+          query_cn: 重大交通基础设施（如运河和铁路）的建设如何影响邻近地区的土地利用变化？
+          enabled: true
+          source: manual
+          note: ''
+        - query: What are the spatiotemporal patterns of land use change around major transportation corridors?
+          query_cn: 重大交通走廊周边的土地利用变化时空格局是什么？
+          enabled: true
+          source: manual
+          note: ''
+        - query: >-
+            Research on land use change induced by transportation infrastructure development using remote sensing and
+            geographic information systems.
+          query_cn: 利用遥感和地理信息系统研究交通基础设施开发引起的土地利用变化。
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-10-11T13:32:55.264Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
