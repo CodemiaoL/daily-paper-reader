@@ -1,0 +1,57 @@
+{
+  "mode": "skims",
+  "generated_at": "2026-10-11T13:45:02.402162+00:00",
+  "stats": {
+    "mode": "skims",
+    "forced_all_quick": true,
+    "min_score": 8.0,
+    "deep_divecandidates": 1,
+    "deep_cap": null,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": null,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2609.27149v1",
+      "source": "arxiv",
+      "title": "Temporally Ordered Region-Token Mamba with Logit-Space Diffusion for Remote Sensing Change Detection",
+      "abstract": "Remote sensing change detection requires both global reasoning across bitemporal images and precise localization of changed regions. However, dense attention is computationally expensive for high-resolution imagery, while conventional feature fusion and coarse decoding may inadequately separate genuine changes from appearance variations or preserve object boundaries. We present Bitemporal Mamba-Diffusion for Change Detection (BMD-CD), which combines temporally structured state-space modeling with logit-space diffusion refinement. BMD-CD converts deep bitemporal features into region tokens and arranges them in explicit temporal partitions before bidirectional state-space propagation. Its Bitemporal Ordered Mamba Operator enables long-range cross-temporal interaction with linear sequence complexity, while Orthogonal Feature Disentanglement forms a change-oriented output and a complementary rotated output using learned pairwise rotations and unchanged-region consistency. Multiscale decoding then produces coarse change logits, which are refined through a five-step Conditional Diffusion Decoder operating directly in logit space. Experiments on LEVIR-CD, WHU-CD, DSIFN-CD, CDD, and S2Looking demonstrate strong performance across diverse change-detection settings. BMD-CD achieves F1 scores of 93.7%, 96.0%, 97.8%, and 99.0% on the four standard benchmarks and improves 3-pixel Boundary-F1 to 87.7% and 91.4% on LEVIR-CD and WHU-CD, respectively. The full model requires 32.09 GFLOPs and 47 ms per 256 x 256 image pair, while also showing zero-shot transfer to ValaisCD and B-FLAIR-test. Our code is available at https://github.com/Aparup2139/Public_WACV/",
+      "authors": [
+        "Anuvab Sen",
+        "Maneet Chatterjee",
+        "Aparup Ghosh",
+        "Udayon Sen",
+        "Arnav Aditya",
+        "Yixin Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-09-22T23:25:12+00:00",
+      "link": "https://arxiv.org/pdf/2609.27149v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "remote sensing change detection method for land cover analysis",
+      "llm_evidence_cn": "遥感变化检测方法，可用于土地覆盖分析",
+      "llm_evidence": "遥感变化检测方法，可用于土地覆盖分析",
+      "canonical_evidence": "遥感变化检测方法，可用于土地覆盖分析",
+      "llm_tldr_en": "BMD-CD combines temporally ordered region-token Mamba with logit-space diffusion to improve remote sensing change detection, achieving precise localization of changed regions while reducing computational cost.",
+      "llm_tldr_cn": "针对遥感变化检测中密集注意力计算昂贵、特征融合难以区分真实变化与外观变化的问题，本文提出BMD-CD方法，将双时相特征转换为区域Token并进行时序有序的Mamba状态空间建模，同时引入Logit空间扩散细化。实验表明该方法能更精确地定位变化区域并保持边界，为高分辨率遥感变化检测提供了高效方案。",
+      "llm_tldr": "针对遥感变化检测中密集注意力计算昂贵、特征融合难以区分真实变化与外观变化的问题，本文提出BMD-CD方法，将双时相特征转换为区域Token并进行时序有序的Mamba状态空间建模，同时引入Logit空间扩散细化。实验表明该方法能更精确地定位变化区域并保持边界，为高分辨率遥感变化检测提供了高效方案。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ]
+}
