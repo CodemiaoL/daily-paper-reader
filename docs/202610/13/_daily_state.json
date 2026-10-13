@@ -1,0 +1,25 @@
+{
+  "date": "20261013",
+  "date_label": "",
+  "generated_at": "2026-10-13 01:22:15 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.05040v1",
+      "route": "202610/13/2610.05040v1-calibrated-weak-supervision-for-post-harvest-burned-cropland-mapping-under-label-scarcity",
+      "title": "Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "遥感土地覆盖变化检测，标签稀缺下的耕地制图",
+      "first_seen_at": "2026-10-13 01:22:15 UTC",
+      "updated_at": "2026-10-13 01:22:15 UTC"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-13",
+  "date": "2026-10-13",
+  "generated_at": "2026-10-13T01:22:16",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202610/13/2610.05040v1-calibrated-weak-supervision-for-post-harvest-burned-cropland-mapping-under-label-scarcity",
+      "section": "quick",
+      "title_en": "Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity",
+      "authors": "Raunak Bhagate, Maitri Polisetty, R I Minu",
+      "date": "2026-10-04",
+      "pdf": "https://arxiv.org/pdf/2610.05040v1",
+      "score": "6.0",
+      "evidence": "遥感土地覆盖变化检测，标签稀缺下的耕地制图",
+      "tldr": "针对收获后火烧农田小而破碎、可靠标签稀缺的问题，研究在印度旁遮普构建校准弱监督框架，融合 Sentinel-2 光谱变化、VIIRS 火点和 MODIS MCD64A1 外部校准。方法比较三种伪标签配方、五类特征及线性/树/提升/神经网络分类器，并用嵌套区县留出交叉验证评估。最佳配置为极严格配方、MLP 与全光学特征，平均 kappa 0.395、AUROC 0.753；部署用 RF，阈值 0.60 下区县尺度 MODIS 一致 R² 0.636。该框架支持区县级负担评估与热点筛查，但像素级精度、跨年稳定性和晚烧覆盖仍有限。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Mapping post-harvest burned cropland is difficult when fires are small and fragmented and reliable labels are scarce. We developed a calibrated weak-supervision framework for Punjab, India, using Sentinel-2 spectral change, VIIRS active-fire context, and MODIS MCD64A1 as a coarse external calibration and agreement reference. Three pseudo-label recipes, five feature representations, and linear, tree-based, boosted, and neural classifiers were evaluated using nested district-held-out cross-validation over three seeds and five folds. NBR and dNBR were excluded from classifier inputs. The best configuration used the very-strict recipe, a multilayer perceptron, and the full optical feature set (mean Cohen's kappa 0.395, AUROC 0.753, F1 0.747, balanced accuracy 0.703); Random Forest, XGBoost, and LightGBM were practically tied. Higher agreement with held-out pseudo-labels did not establish improved label correctness or independent burned-area accuracy. For deployment, a Random Forest with the very-strict recipe and full optical features was retained. An externally calibrated threshold of 0.60 yielded district-level MODIS agreement of R-squared 0.636, a mapped-to-MODIS burned-area ratio of 1.005, and Spearman correlation of 0.779 with district fire counts. Pixel-level MODIS agreement remained modest (F1 0.205, kappa 0.093). Zero-shot transfer to Haryana was promising (mean kappa 0.641), but Punjab cross-year stability was weak, and Sentinel-1/Sentinel-2 feature concatenation did not improve the optical baseline. Optical observations ended before the seasonal fire context, limiting coverage of late burns. The framework supports district-scale burden assessment and hotspot screening, with limited support for exact scar boundaries or temporally stable annual mapping.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

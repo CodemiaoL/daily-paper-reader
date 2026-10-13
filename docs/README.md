@@ -48,7 +48,7 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-10-11</span>
+      <span class="dpr-home-dashboard-kicker">2026-10-13</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
     <strong class="dpr-home-dashboard-count">共 1 篇</strong>
@@ -58,7 +58,7 @@
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-11 22:58:09 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-13 01:22:15 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,9 +69,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今天精读挂零，只速读了一篇 6.0 分的论文：把 Dynamic World 地表水制图搬到 Sentinel-1 雷达影像上。</p>
-<p>最值得看的方向是&quot;用 AlphaEarth 嵌入做跨传感器迁移&quot;——即让已有的光学水体制图能力适配雷达数据，对多云多雨地区的水体监测有潜在价值，但 6.0 的分数说明属可看不必细抠。</p>
-<p>普通读者建议先翻摘要和精度验证部分，确认它在你关心的区域和季节是否真的比现有方法更稳，再决定要不要深入。</p>
+<p>今日速读 1 篇，聚焦标签稀缺下的收获后焚烧耕地制图。唯一入选的《Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity》（6.0/10）值得关注的是用校准弱监督缓解标注不足，提升焚烧耕地识别。普通读者若关心农业遥感，可留意弱监督方法在少标签场景的落地效果。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -96,7 +94,7 @@
     <strong class="dpr-home-dashboard-count">1 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings">Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity">Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity</span></li></ul>
   </div>
   <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">transit-lucc <strong>1</strong></span></div>
 </section>

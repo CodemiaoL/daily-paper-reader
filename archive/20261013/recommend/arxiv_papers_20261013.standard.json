@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-13T01:21:33.225451+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.05040v1",
+      "source": "arxiv",
+      "title": "Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity",
+      "abstract": "Mapping post-harvest burned cropland is difficult when fires are small and fragmented and reliable labels are scarce. We developed a calibrated weak-supervision framework for Punjab, India, using Sentinel-2 spectral change, VIIRS active-fire context, and MODIS MCD64A1 as a coarse external calibration and agreement reference. Three pseudo-label recipes, five feature representations, and linear, tree-based, boosted, and neural classifiers were evaluated using nested district-held-out cross-validation over three seeds and five folds. NBR and dNBR were excluded from classifier inputs. The best configuration used the very-strict recipe, a multilayer perceptron, and the full optical feature set (mean Cohen's kappa 0.395, AUROC 0.753, F1 0.747, balanced accuracy 0.703); Random Forest, XGBoost, and LightGBM were practically tied. Higher agreement with held-out pseudo-labels did not establish improved label correctness or independent burned-area accuracy. For deployment, a Random Forest with the very-strict recipe and full optical features was retained. An externally calibrated threshold of 0.60 yielded district-level MODIS agreement of R-squared 0.636, a mapped-to-MODIS burned-area ratio of 1.005, and Spearman correlation of 0.779 with district fire counts. Pixel-level MODIS agreement remained modest (F1 0.205, kappa 0.093). Zero-shot transfer to Haryana was promising (mean kappa 0.641), but Punjab cross-year stability was weak, and Sentinel-1/Sentinel-2 feature concatenation did not improve the optical baseline. Optical observations ended before the seasonal fire context, limiting coverage of late burns. The framework supports district-scale burden assessment and hotspot screening, with limited support for exact scar boundaries or temporally stable annual mapping.",
+      "authors": [
+        "Raunak Bhagate",
+        "Maitri Polisetty",
+        "R I Minu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-10-04T08:17:42+00:00",
+      "link": "https://arxiv.org/pdf/2610.05040v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "remote sensing land cover change detection for burned cropland mapping under label scarcity",
+      "llm_evidence_cn": "遥感土地覆盖变化检测，标签稀缺下的耕地制图",
+      "llm_evidence": "遥感土地覆盖变化检测，标签稀缺下的耕地制图",
+      "canonical_evidence": "遥感土地覆盖变化检测，标签稀缺下的耕地制图",
+      "llm_tldr_en": "This paper develops a calibrated weak-supervision framework using Sentinel-2 spectral change and fire context to map post-harvest burned cropland in Punjab, addressing land cover change detection under label scarcity.",
+      "llm_tldr_cn": "本文针对火灾小而破碎、可靠标签稀缺时收获后焚烧耕地难以制图的问题，提出校准式弱监督框架。方法融合Sentinel-2光谱变化、VIIRS活跃火点上下文与MODIS火产品作为外部校准，比较多种伪标签策略、特征表示与分类器，并采用嵌套交叉验证评估。结果表明严格伪标签配方配合多层感知机与完整光学特征取得最优性能。该工作为遥感土地覆盖变化检测提供了可迁移的弱监督思路。",
+      "llm_tldr": "本文针对火灾小而破碎、可靠标签稀缺时收获后焚烧耕地难以制图的问题，提出校准式弱监督框架。方法融合Sentinel-2光谱变化、VIIRS活跃火点上下文与MODIS火产品作为外部校准，比较多种伪标签策略、特征表示与分类器，并采用嵌套交叉验证评估。结果表明严格伪标签配方配合多层感知机与完整光学特征取得最优性能。该工作为遥感土地覆盖变化检测提供了可迁移的弱监督思路。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

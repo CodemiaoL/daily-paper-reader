@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-10-13 <!--dpr-date:20261013-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/13/2610.05040v1-calibrated-weak-supervision-for-post-harvest-burned-cropland-mapping-under-label-scarcity" data-sidebar-item="{&quot;title&quot;: &quot;Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.05040v1-calibrated-weak-supervision-for-post-harvest-burned-cropland-mapping-under-label-scarcity&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;遥感土地覆盖变化检测，标签稀缺下的耕地制图&quot;}">Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity</a>
   * 2026-10-11 <!--dpr-date:20261011-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/11/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings" data-sidebar-item="{&quot;title&quot;: &quot;Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.06704v1-extending-dynamic-world-surface-water-mapping-to-sentinel-1-with-alphaearth-embeddings&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;土地利用与土地覆盖制图&quot;}">Extending Dynamic World Surface Water Mapping to Sentinel-1 with AlphaEarth Embeddings</a>

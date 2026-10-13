@@ -1,0 +1,632 @@
+Calibrated Weak Supervision for Post-Harvest
+Burned-Cropland Mapping Under Label Scarcity
+Raunak Bhagate
+Maitri Polisetty
+R I Minu
+rb7314@srmist.edu.in
+SRM Institute of Science & Technology
+Abstract
+Fine-resolution burned-cropland information is needed to monitor post-harvest crop-residue burning
+in Punjab, India, where many fires are small, fragmented, and difficult to characterize using a coarse
+burned-area product alone. Reliable exhaustive labels are scarce, while labels derived from active-
+fire detections and spectral rules can be noisy, spatially biased, and partly circular. We therefore
+developed a calibrated weakly supervised framework using Sentinel-2 spectral change, Visible Infrared
+Imaging Radiometer Suite (VIIRS) active-fire context, and MODIS MCD64A1 as a coarse external
+calibration and agreement reference. Three pseudo-label recipes of increasing selectivity, five feature
+representations, and classifier families spanning linear, tree-based, boosted, and neural models were
+evaluated using nested district-held-out cross-validation over three seeds and five folds. The best
+trained configuration combined the very-strict recipe, a multilayer perceptron, and the full optical
+feature set, with mean Cohen’s kappa of 0.395, area under the receiver operating characteristic curve of
+0.753, F1 of 0.747, and balanced accuracy of 0.703. Random Forest, XGBoost, and LightGBM were
+practically tied with the nominal winner. Stricter recipes achieved higher agreement with their own
+held-out pseudo-labels, without establishing improved label correctness or independent burned-area
+accuracy. Optical coverage ended before the seasonal fire context, so early burns may affect the earlier
+composite and late-season scars are not observed by the later composite. For deployment in Google
+Earth Engine, a Random Forest using the very-strict recipe and full optical feature set was retained and
+externally calibrated. A threshold of 0.60 produced district-level MODIS agreement of 𝑅2 = 0.636, a
+mapped-to-MODIS burned-area ratio of 1.005, and Spearman correlation of 0.779 with district fire
+counts; pixel-level MODIS agreement remained modest (𝐹1 = 0.205; 𝜅= 0.093). Zero-shot transfer to
+Haryana was promising (mean 𝜅= 0.641), whereas Punjab cross-year stability was weak and simple
+Sentinel-1/Sentinel-2 feature concatenation did not improve the optical baseline. The framework is
+therefore most defensible for district-scale burden assessment and hotspot screening, rather than exact
+scar-boundary delineation or temporally invariant annual mapping. The code and data are publicly
+available in the GitHub repository.
+1
+Introduction
+Post-harvest crop-residue burning is a recurrent land-management practice in northwestern India and an important
+target for satellite-based environmental monitoring. Punjab’s intensive rice–wheat system generates large quantities
+of seasonal residue, and burning contributes to severe episodic air pollution while complicating mitigation and policy
+evaluation (Bhuvaneshwari et al., 2019; Jethva et al., 2019; Lan et al., 2022). Spatially explicit burned-cropland
+information is consequently needed for district-scale burden assessment, hotspot identification, emissions analysis,
+and evaluation of residue-management interventions. Moderate-resolution burned-area products such as MODIS
+MCD64A1 provide consistent regional records, but their spatial support can underresolve small and fragmented
+agricultural burns (Giglio et al., 2018; Roteta et al., 2019). Sentinel-2 therefore offers a useful fine-resolution
+representation of rapid post-fire surface change, provided that the mapping workflow can operate under realistic
+constraints on reference-label availability.
+1
+arXiv:2610.05040v1  [cs.LG]  4 Oct 2026
+
+
+Agricultural burning is a difficult discrimination problem because the signal of fire is embedded within a rapidly
+changing post-harvest surface. Crop removal, bare-soil exposure, tillage, moisture variation, senescence, and
+residue burning can produce overlapping optical responses over short periods. Burns may also be discontinuous
+and quickly modified, reducing the temporal persistence of scars. These characteristics limit direct transfer from
+generic wildfire mapping and increase the need for cropland-specific context (Singh et al., 2009). At the same time,
+exhaustive manually interpreted burn maps are expensive to create at the spatial and temporal scales required for
+supervised learning.
+Weak supervision offers a practical alternative by constructing labels from indirect evidence such as active-fire
+detections, spectral rules, and pre-existing products. The central risk is that proxy labels are neither neutral nor
+equally informative: their thresholds, spatial buffers, and negative-sampling rules define the learning problem itself.
+In addition, a burn-sensitive index used to generate labels can create circularity if the same variable is reused as a
+predictor. Internal performance against held-out weak labels may then measure reproduction of the labeling recipe
+rather than a deployment-ready burned-cropland map. Spatially random train–test splits can further exaggerate
+generalization because nearby remote-sensing samples are dependent (Karasiak et al., 2022; Roberts et al., 2017).
+This study addresses these problems through a controlled weak-supervision and calibration framework for Punjab,
+with Haryana used only for geographic transfer testing. Sentinel-2 provides the primary optical representation;
+VIIRS detections provide spatial fire context for label construction; MODIS MCD64A1 provides a coarse external
+reference for threshold calibration and agreement diagnostics rather than pixel-perfect ground truth; and district fire
+counts provide an independent concordance signal at aggregate scale. Direct label-construction variables, including
+dNBR and NBR, are excluded from classifier inputs.
+The study asks three linked questions. First, how strongly do pseudo-label selectivity, feature representation, and
+classifier family influence district-held-out performance under matched sampling and evaluation? Second, does
+the internally selected decision threshold yield a spatially plausible statewide product, or is a separate external
+deployment-threshold calibration required? Third, how does the selected framework behave under neighboring-state
+transfer, cross-year application in Punjab, and simple Sentinel-1/Sentinel-2 feature fusion? By separating weak-label
+discrimination from map-level calibration, the study aims to define both the achievable signal and the defensible
+application scale of burned-cropland mapping under label scarcity.
+2
+Literature Review
+Fine-resolution burned-area mapping has increasingly moved from coarse global products toward Landsat- and
+Sentinel-based multitemporal change detection. MCD64A1 remains a major global reference because it combines
+spectral change with active-fire information and provides a consistent 500 m record (Giglio et al., 2018). However,
+small-fire studies have repeatedly shown that moderate-resolution products omit or aggregate burns that can be
+recovered with 10–30 m imagery. Sentinel-2 algorithms use temporal change, region growing, or active-fire-seeded
+candidate areas to delineate smaller scars (Roteta et al., 2019; Sali et al., 2021), while Landsat/Sentinel combinations
+and cloud-computing workflows support broader high-resolution coverage (Long et al., 2019; Roy et al., 2019).
+These developments are directly relevant to agricultural fires, where individual fields are often smaller than the
+support of coarse burned-area products.
+Active-fire observations and optical burn scars provide complementary evidence rather than interchangeable labels.
+VIIRS offers high-frequency thermal detections at nominal 375 m resolution and is useful for locating likely fire
+activity in space and time (Schroeder et al., 2014). Optical imagery offers finer spatial structure but depends on
+cloud-free observations and the persistence of post-fire spectral change. Active-fire-assisted methods therefore
+often use hotspots as seeds or spatial priors and optical change as the delineation signal. In northwestern India,
+remote-sensing studies and survey-constrained analyses also show that crop-residue burning varies across districts,
+years, and management contexts, so neither fire counts nor a single coarse product can serve as complete pixel-level
+truth (Liu et al., 2020; Singh et al., 2009).
+Weak supervision formalizes the use of heuristic, noisy, incomplete, or correlated labeling sources when manual
+annotations are unavailable. Systems such as Snorkel demonstrate that labeling functions and proxy sources can
+create scalable training data, but their usefulness depends on source accuracy, dependence, and coverage (Ratner
+et al., 2020). In burned-cropland mapping, threshold rules based on spectral change and proximity to active fires act
+as labeling functions even when not described in those terms. The resulting recipe can contain substantial predictive
+structure before a classifier is trained. This makes label design a scientific factor that should be varied and reported,
+rather than treated as a fixed preprocessing detail.
+Noisy supervision also motivates comparison across model families and losses. Random Forest is widely used in
+remote sensing because it handles nonlinear interactions, correlated predictors, and modest sample sizes while
+remaining operationally simple (Belgiu and Drăguţ, 2016; Breiman, 2001). XGBoost and LightGBM provide
+efficient boosted-tree alternatives (Chen and Guestrin, 2016; Ke et al., 2017), whereas multilayer perceptrons test
+whether learned nonlinear combinations improve performance. Symmetric cross-entropy was proposed to reduce
+2
+
+
+neural-network sensitivity to noisy labels (Wang et al., 2019), but gains under remotely sensed proxy supervision
+remain empirical rather than guaranteed.
+Evaluation design is as important as classifier choice. Spatial dependence between training and test samples can
+inflate accuracy, making geographically disjoint validation more realistic for regional mapping (Karasiak et al.,
+2022; Roberts et al., 2017). A second issue is thresholding: the probability cutoff that maximizes agreement with
+weak labels need not yield plausible mapped area or district patterns. External evidence is therefore needed after
+model fitting, but the evidential role of each source must remain explicit. Coarse MODIS agreement can support
+regional plausibility and area calibration, yet it cannot establish exact 20 m scar boundaries. The unresolved gap is a
+single controlled study that jointly tests pseudo-label design, circularity-aware features, classifier families, spatially
+held-out evaluation, external deployment-threshold calibration, and transfer behavior for fine-resolution burned
+cropland in Punjab.
+3
+Materials and Methods
+3.1
+Study Area, Temporal Scope, and Data Roles
+Punjab, India, was the primary study area, and Haryana was used as a neighboring transfer region (Figure 1).
+Administrative units were obtained from FAO GAUL level-2 boundaries. All label construction, sampling, and
+inference were restricted to cropland using ESA WorldCover 2021 v200 class 40 (Zanaga et al., 2022). This
+restriction kept the task specific to burned cropland rather than generic fire detection and retained district identity
+for spatial folds and zonal summaries.
+The primary experiment used the 2024 post-monsoon residue-burning season. The earlier optical composite
+covered 20 September–9 October 2024, and the later optical composite covered 15 October–4 November 2024,
+accounting for Earth Engine’s exclusive end dates. VIIRS fire context covered 1 October–29 November, while
+MODIS used the October and November monthly products. The optical observation windows were therefore shorter
+than the seasonal reference period. Punjab 2023 was processed with the same temporal structure for the reported
+cross-year comparison. Sentinel-2 surface reflectance was the primary optical input (Drusch et al., 2012); Sentinel-1
+ground-range-detected imagery was used only in the fusion experiment (Torres et al., 2012); SNPP and NOAA-20
+VIIRS detections provided active-fire context; MODIS MCD64A1 provided the external calibration and agreement
+reference; and district fire counts provided a rank-concordance signal.
+Figure 1: Study area and active-fire context. (a) Punjab and Haryana in northwestern India. (b) Punjab districts and the ESA
+WorldCover cropland mask used to restrict analysis. (c) High-confidence VIIRS active-fire density over Punjab cropland from 1
+October–29 November 2024.
+3.2
+Framework Overview and Image Preprocessing
+The workflow consisted of seasonal compositing, weak-label generation, quality-control gating, matched sampling,
+district-held-out model evaluation, statewide probability inference, external threshold calibration, and robustness
+testing (Figure 2). Google Earth Engine was used for geospatial assembly, preprocessing, weak-label construction,
+and map export; Python was used for classifier benchmarking, paired statistics, calibration analysis, and reporting.
+Sentinel-2 acquisitions were filtered by date and study area, and scenes with CLOUDY_PIXEL_PERCENTAGE ≤80
+were retained.
+A Sentinel-2 cloud-probability threshold of 35 was applied together with QA60 and Scene
+Classification Layer screening for cloud, cirrus, shadow, and invalid observations. Median composites were
+generated for the earlier and later optical windows. Ten bands were retained (B2, B3, B4, B5, B6, B7, B8, B8A,
+B11, and B12), together with normalized difference vegetation index (NDVI), normalized difference moisture
+3
+
+
+index (NDMI), normalized difference red-edge index (NDRE), and temporal differences. NBR and dNBR were
+calculated for label construction but excluded from every classifier feature set. The raw SWIR2 change term was
+𝑑𝐵12 = 𝐵12later −𝐵12earlier. Sentinel-1 preprocessing used GRD scenes in IW mode, descending orbit, and VV/VH
+polarization; median earlier and later composites and later-minus-earlier delta backscatter were exported at 20 m for
+the dedicated fusion test. Before model training, plausibility gates required at least 95% cropland coverage in each
+optical composite, at least 1,000 high-confidence VIIRS detections, a nonzero MODIS burned reference, and at
+least 10,000 statewide positive weak labels per recipe. Weak positives were also required to reach an overlap score
+of at least 0.25 with MODIS at 500 m support, while district label availability and sampled feature-correlation
+checks were screened before training.
+Figure 2: End-to-end weak-supervision and calibration workflow. Sentinel-2 preprocessing, VIIRS-anchored pseudo-labels,
+matched district-held-out evaluation, statewide RF inference, external deployment-threshold calibration, and robustness testing
+are kept as distinct stages. The schematic’s pre/post labels denote the earlier/later optical composites; its October–November
+season denotes the broader reference period. NBR and dNBR are used for label construction but excluded from classifier inputs.
+3.3
+Weak-Label Recipes and Feature Design
+Weak labels combined VIIRS fire proximity with burn-consistent optical change. High-confidence SNPP and
+NOAA-20 detections were merged for the VIIRS context window, converted to a fire-context layer, and transformed
+into distance to the nearest detection. Figure 3 illustrates the resulting ternary construction.
+Each cropland pixel was assigned as weak positive, weak negative, or unlabeled. Positive pixels had to fall within a
+recipe-specific near-fire distance and pass dNBR and SWIR change gates; the most selective recipe also required
+an NDVI decrease. Negative pixels were either sufficiently far from detected fire or near fire but spectrally quiet.
+Pixels satisfying neither class rule were excluded from training.
+Three recipes represented an explicit quantity–selectivity axis (Table 1). The moderate recipe used the widest
+near-fire buffer and lowest dNBR threshold. The strict recipe tightened the spatial and spectral conditions. The
+very-strict recipe reduced the near-fire radius to 1.5 km, increased the dNBR and 𝑑𝐵12 requirements, extended the
+far-from-fire distance, tightened hard-negative limits, and added an NDVI-decrease gate. The recipes shared the
+same source layers and seasonal windows; only thresholds, buffers, and gates changed.
+Five feature sets were defined by analytical purpose (Table 2). Set A was the full 39-variable optical representation
+with earlier, later, and delta information. Set B retained 13 delta-only variables. Set C combined earlier optical state
+and deltas. Set D removed SWIR-related predictors as the primary circularity ablation. Set E augmented Set A
+with six Sentinel-1 variables. Set A served as the exported superset for optical comparisons, so Sets B–D were
+reconstructed by column selection on identical samples.
+4
+
+
+Figure 3: Weak-label construction. Cropland and VIIRS fire context are intersected with burn-consistent spectral gates to
+produce weak positives, weak negatives, and unlabeled pixels. The displayed parameter block corresponds to the exact very-strict
+configuration.
+Recipe
+d
+NBR
+Near
+km
+𝑑𝐵
+12
+HN
+d
+HN
+b
+Far
+km
+NDVI
+Moderate
+0.18
+3.0
+> 200
+0.06
+120
+8
+None
+Strict
+0.22
+2.0
+> 200
+0.05
+100
+8
+None
+Very-strict
+0.28
+1.5
+> 250
+0.04
+80
+10
+> 0.10
+Table 1: Weak-label recipe parameters. Near- and far-fire distances are in km; HN denotes hard-negative, with 𝑑and 𝑏denoting
+dNBR and 𝑑𝐵12. The recipes share the same inputs and seasonal windows and differ only in spatial and spectral selection
+constraints.
+Set
+Size
+Composition
+Analytical purpose
+A
+39
+Earlier, later, and delta values for 10
+Sentinel-2 bands plus three indices
+Full optical production representation
+B
+13
+Delta-only optical variables
+Tests whether change alone is sufficient
+C
+26
+Earlier optical state plus delta variables
+Retains baseline context with reduced
+redundancy
+D
+33
+Full optical set without SWIR-related
+predictors
+Primary circularity ablation
+E
+45
+Set A plus Sentinel-1 VV/VH earlier,
+later, and delta
+Simple optical–radar fusion test
+Table 2: Feature-set definitions. NBR and dNBR are excluded from every classifier feature set because they are used in
+weak-label construction.
+3.4
+Sampling, Classifiers, Baselines, and District-Held-Out Evaluation
+For each recipe and seed, stratified sampling selected 3,000 weak-positive and 3,000 weak-negative pixels. Three
+fixed seeds (13, 29, and 71) were used. Districts, rather than pixels, were assigned to five outer folds so that all
+samples from a district were held out together. The resulting 15 seed–fold evaluations per configuration reduced local
+spatial leakage and measured transfer to unseen districts. Within each outer training set, three-fold district-based
+inner validation selected a probability threshold from 0.1 to 0.9 in steps of 0.1 by maximizing Cohen’s kappa.
+Held-out districts were not used for threshold tuning.
+The learned-model comparison included Logistic Regression, Random Forest (RF), Gradient Boosted Trees,
+XGBoost, LightGBM, a multilayer perceptron (MLP), and an MLP trained with symmetric cross-entropy (MLP-
+SCE). RF used 300 trees, square-root feature subsampling, and minimum leaf size 1. Gradient Boosted Trees used
+5
+
+
+300 estimators, a learning rate of 0.1, and at most 64 leaf nodes. The baseline MLP used hidden layers of 128
+and 64 units, batch normalization, ReLU activation, dropout of 0.3, Adam optimization, learning rate 0.001, batch
+size 256, and 200 epochs. MLP-SCE used the same architecture with symmetric cross-entropy weights 𝛼= 1 and
+𝛽= 1. All classifier families were evaluated on the same matched samples and district folds. Valid non-learned
+benchmark comparators were the recipe-rule threshold and a fixed dNBR threshold of 0.12. MODIS was not treated
+as a classifier baseline because a valid district-held-out MODIS benchmark was not completed.
+Internal evaluation was explicitly against held-out weak pseudo-labels, not human-scored pixel truth. Each recipe
+defined its own evaluation labels and sampled population, so cross-recipe differences do not isolate training-label
+quality against a common independent reference. Cohen’s kappa was the primary ranking metric, supported by
+𝐹1, balanced accuracy, area under the receiver operating characteristic curve (AUC), precision, recall, specificity,
+selected threshold, and predicted positive rate. Decision-relevant paired contrasts used Wilcoxon signed-rank tests
+across matched seed–fold splits, Bonferroni correction, and Cliff’s delta.
+3.5
+Production Model and External Deployment-Threshold Calibration
+The best trained configuration and the production configuration were separated. The nominal best learned model was
+MLP/very-strict/Set A. RF/very-strict/Set A was retained for production because the mapping workflow constructed
+the model directly in Google Earth Engine, whose exporter supports native RF and gradient-boosted trees but not
+the PyTorch MLP. The MLP advantage over RF on Set A was only 0.00253 kappa and was non-significant after
+correction (corrected 𝑝= 1.0; Cliff’s 𝛿= −0.013). RF therefore avoided a separate neural inference path without a
+meaningful performance penalty.
+Feature Set B was marginally stronger than Set A for RF in internal cross-validation and was more parsimonious. Set
+A was nevertheless the actual full-feature production configuration because it had been manually fixed, exported, and
+taken through the complete statewide calibration workflow. Set A is therefore reported as the deployed configuration,
+not as an internally optimal RF feature set.
+After retraining RF/very-strict/Set A on all labeled Punjab samples, the statewide probability surface was evaluated
+at 17 external candidate thresholds from 0.10 to 0.90 in 0.05 increments. Three deployment gates were defined:
+district-level 𝑅2 against MODIS of at least 0.50, mapped-to-MODIS burned-area ratio of at most 2.0, and district
+fire-count Spearman correlation of at least 0.60. Thresholds were ranked by: (1) maximum gates passed; (2)
+preference for passing the area-ratio gate; (3) area ratio closest to 1 on a log scale; (4) higher district 𝑅2; (5)
+higher fire-count Spearman correlation; (6) higher pixel-level MODIS 𝐹1; and (7) lower threshold. For pixel-level
+agreement diagnostics, the 20 m model output was brought to the 500 m MODIS grid before overlap metrics were
+computed, avoiding direct pixel matching across unequal supports. Thresholds 0.55, 0.60, 0.65, and 0.70 passed all
+three gates; 0.60 was selected because its area ratio, 1.005, was closest to parity. MODIS and fire-count values
+at the selected threshold are calibration statistics, and pixel metrics are agreement diagnostics on the calibration
+reference rather than independent post-selection validation.
+3.6
+Robustness Experiments
+Geographic transfer used three RF/very-strict/Set A models fitted on Punjab samples, one per seed, and applied
+directly to Haryana. No Haryana training, fine-tuning, or threshold calibration was performed. Each model used
+its Punjab-only inner-cross-validation threshold: 0.30, 0.40, and 0.30. The reported Haryana kappa is the mean
+sample-level zero-shot performance across the three models.
+Temporal stability compared Punjab 2023 with Punjab 2024 under the same seasonal design and evaluation
+framework. The paper reports only these two years. Sensor augmentation compared optical Set A with Set E, which
+added earlier, later, and delta VV/VH features through simple concatenation. The result therefore tests this specific
+fusion design, not the general utility of radar for burned-area mapping.
+4
+Results
+4.1
+Recipe Selectivity and Held-Out Pseudo-Label Agreement
+Stricter recipes achieved higher agreement with their own held-out pseudo-labels. The moderate recipe generated
+81,471 positive labels and achieved mean kappa of 0.216 and mean AUC of 0.658 across classifiers and feature sets.
+The strict recipe generated 73,746 positives and improved to kappa 0.272 and AUC 0.685. The very-strict recipe
+generated the fewest positives (59,063) but reached mean kappa 0.375 and AUC 0.738 (Figure 4). These increases
+describe agreement on recipe-specific evaluation populations, rather than an independently verified improvement in
+burned-area accuracy.
+6
+
+
+The best trained configuration was MLP/very-strict/Set A, with mean kappa 0.3951, AUC 0.753, 𝐹1 0.747, and
+balanced accuracy 0.703 across 15 district-held-out splits (Table 3). Several alternatives were effectively co-ranked:
+RF/very-strict/Set B reached kappa 0.395, XGBoost/very-strict/Set A reached 0.394, RF/very-strict/Set A reached
+0.3926, and leading LightGBM variants were within the same narrow range. The paired MLP/A versus RF/A
+comparison yielded Δ𝜅= 0.00253, corrected 𝑝= 1.0, and Cliff’s 𝛿= −0.013, providing no evidence of a
+meaningful advantage for the neural model.
+The non-learned comparisons further showed how much signal was already embedded in label construction. The
+fixed dNBR baseline remained weak at approximately kappa 0.126–0.127 across recipes. In contrast, the recipe-rule
+comparator improved with recipe strength and reached kappa 0.426 for the very-strict recipe. This comparator
+is structurally close to the pseudo-label construction and is not a learned model, and its performance reflects
+agreement with recipe-specific pseudo-labels rather than independently measured label quality. Learning provided
+a transferable probability surface and multivariate refinement, while recipe comparisons remained conditional on
+their respective evaluation labels.
+Circularity-aware feature analysis supported a broader optical-change signal rather than direct reproduction of dNBR.
+NBR and dNBR were absent from all model inputs, and performance declined for the no-SWIR Set D, showing that
+burn-sensitive optical information beyond the excluded label-construction indices contributed to discrimination. Set
+B’s competitive RF result also showed that temporal deltas carried substantial predictive information, although the
+production workflow retained full Set A for operational continuity. Together, these ablations support a multivariate
+optical-change interpretation while avoiding a stronger claim about individual-variable importance.
+Rank
+Recipe
+Model
+Set Mean 𝜅
+SD 𝜅
+AUC
+𝐹1
+Bal. acc.
+1
+Very-strict
+MLP
+A
+0.395
+0.049 0.753 0.747
+0.703
+2
+Very-strict
+RF
+B
+0.395
+0.053 0.747 0.744
+0.703
+3
+Very-strict
+XGBoost
+A
+0.394
+0.053 0.740 0.747
+0.703
+4
+Very-strict
+RF
+A
+0.393
+0.056 0.744 0.746
+0.701
+5
+Very-strict LightGBM
+B
+0.393
+0.052 0.740 0.748
+0.701
+Table 3: Leading learned configurations. Values are means across 15 district-held-out evaluations (three seeds × five folds).
+Figure 4: Quantity–selectivity pattern across pseudo-label recipes. The very-strict recipe produced fewer positive weak labels
+and higher mean district-held-out agreement with its own pseudo-labels. Evaluation labels and sampled populations varied
+across recipes, so this pattern does not establish improved label correctness or independent burned-area accuracy.
+4.2
+External Threshold Calibration and Scale-Dependent Agreement
+The internally selected threshold was not suitable for statewide deployment. RF/very-strict/Set A had a median
+cross-validation threshold of 0.30, but applying that cutoff to the full probability map produced a mapped burned-
+area ratio far above MODIS. External calibration shifted the decision threshold to 0.60 (Figure 5). This change
+demonstrates that discrimination among weakly labeled samples and calibration of mapped extent are distinct stages.
+Thresholds 0.55–0.70 satisfied all three deployment gates. The ranking rule selected 0.60 because its mapped-to-
+MODIS area ratio was 1.005, closest to aggregate parity. At this threshold, district-level 𝑅2 against MODIS was
+0.636 and Spearman correlation with district fire counts was 0.779 (Table 4). These statistics support district-scale
+burden and rank consistency after calibration.
+7
+
+
+Pixel-level agreement with the coarse MODIS reference remained modest: 𝐹1 was 0.205 and kappa was 0.093.
+Precision and recall were both approximately 0.20, while specificity was substantially higher. The result is consistent
+with support mismatch between a fine-resolution product and a 500 m reference, as well as with residual errors in
+both sources. It does not support exact scar-boundary claims.
+District residuals were geographically structured. Firozpur and Moga showed close agreement, whereas Sangrur,
+Muktsar, Bathinda, and Mansa were underestimated relative to MODIS. Several lower-MODIS-burn districts were
+overestimated. The map can therefore reproduce aggregate statewide extent and much of the district ranking
+while retaining district-specific bias. The reported MODIS and fire-count values are the evidence used to choose
+the threshold and should be interpreted as calibration and agreement statistics, not as an independent evaluation
+conducted after threshold selection.
+Item
+Value
+Production classifier
+Random Forest (300 trees)
+Pseudo-label recipe
+Very-strict
+Feature set
+A (39 optical variables)
+Median internal CV threshold
+0.30
+Externally calibrated threshold
+0.60
+District 𝑅2 vs. MODIS
+0.636
+Mapped/MODIS burned-area ratio
+1.005
+Spearman 𝜌vs. district fire counts
+0.779
+Pixel 𝐹1 vs. MODIS
+0.205
+Pixel 𝜅vs. MODIS
+0.093
+Deployment gates passed
+3/3
+Table 4: Production configuration and selected-threshold calibration/agreement statistics.
+Figure 5: External deployment-threshold calibration for RF/very-strict/Set A. The internal threshold (0.30) and calibrated
+threshold (0.60) are compared across district MODIS fit, aggregate area ratio, fire-count rank correlation, and pixel MODIS 𝐹1.
+The selected cutoff balances the predefined criteria rather than maximizing a single metric.
+4.3
+Geographic Transfer, Cross-Year Stability, and Sentinel-1 Fusion
+Zero-shot transfer to Haryana was promising. The three Punjab-trained RF models, applied without Haryana
+training or recalibration and using Punjab-only thresholds of 0.30, 0.40, and 0.30, achieved mean sample-level
+8
+
+
+kappa of 0.641. This result indicates that the learned decision surface transferred to a neighboring agricultural
+region under the tested seasonal and sensor conditions. It does not establish broad geographic generalization beyond
+similar settings.
+Temporal behavior was substantially weaker. Punjab 2023 achieved kappa 0.662, whereas Punjab 2024 achieved
+0.393, with a two-year standard deviation of 0.135. The framework should therefore not be described as temporally
+invariant. Year-specific changes in fire intensity, crop timing, atmospheric contamination, compositing quality, or
+pseudo-label fidelity may all contribute, but the completed experiments do not isolate a single cause.
+Simple optical–radar concatenation did not improve the selected optical baseline. RF/very-strict/Set A achieved
+mean kappa 0.393, while Set E reached 0.378, a difference of −0.015 (Table 5). This negative result is bounded to
+the tested pre/post/delta VV/VH concatenation and does not imply that Sentinel-1 is generally uninformative.
+Experiment
+Configuration/protocol
+Mean 𝜅
+Interpretation
+Haryana zero-shot
+Punjab-trained RF/very-strict/A; thresholds
+0.30, 0.40, 0.30; no Haryana fitting or
+calibration
+0.641
+Promising neighboring-state
+transfer
+Punjab 2023
+Same seasonal framework
+0.662
+Stronger year-specific
+performance
+Punjab 2024
+Primary experiment
+0.393
+Weaker year-specific
+performance
+S1 + S2 fusion
+Set E minus optical Set A
+−0.015 Δ𝜅
+Simple concatenation did not
+improve performance
+Table 5: Robustness and transfer summary. Cross-year reporting is limited to Punjab 2023 and 2024.
+5
+Discussion
+5.1
+Interpreting Recipe-Specific Pseudo-Label Agreement
+The increase in agreement from moderate to very-strict recipe-specific pseudo-labels is the paper’s central observed
+pattern. Tighter fire proximity, stronger spectral gates, and harder negative selection changed both the supervision
+and the evaluation population. Higher agreement may therefore reflect a more separable classification task as
+well as changes in training supervision. Because true label purity was not directly measured and the recipes were
+not evaluated against a common independent reference, the results do not establish improved label correctness or
+burned-area accuracy.
+The near-equivalence of MLP, RF, XGBoost, and LightGBM under the strongest recipe also has an operational
+implication. Flexible classifiers cannot recover information that is absent or contradictory in the weak labels. Under
+the very-strict recipe, several nonlinear families achieved similar agreement with held-out pseudo-labels. The
+very-strict recipe-rule result reinforces this point: substantial discrimination was already encoded by the proxy rules.
+The role of learning was therefore to generalize beyond hard rule boundaries, integrate multiple change features,
+and produce a continuous statewide score rather than to create the signal from scratch. The feature-set ablations are
+also physically coherent with post-harvest burning: the reduction after removing SWIR-related predictors and the
+competitiveness of delta-only features are consistent with abrupt changes in vegetation condition, surface or canopy
+moisture, and shortwave-infrared response. These mechanisms are supportive rather than burn-specific, because
+harvest, tillage, moisture change, and atmospheric effects can produce overlapping spectral changes.
+5.2
+Why External Calibration Was Necessary and What Scale It Supports
+The difference between the internal threshold of 0.30 and deployment threshold of 0.60 shows why weak-label
+performance cannot be transferred directly to mapping. Nested cross-validation selected a cutoff that best separated
+weak positives and negatives in held-out districts. Those classes were constructed through selective spatial and
+spectral rules and did not reproduce the prevalence or uncertainty of all cropland pixels. Statewide inference
+therefore required a second threshold-selection problem tied to mapped area and district patterns.
+External calibration improved the plausibility of aggregate extent and district ranking, but it did not convert MODIS
+into ground truth. MCD64A1 has coarser spatial support and its own omission and commission characteristics,
+especially for small agricultural burns. District 𝑅2, area ratio, and fire-count concordance are consequently more
+defensible indicators of regional burden than exact pixel overlap. The calibrated product is suited to district
+comparison, hotspot screening, and prioritization. It is not yet a reliable source of exact field boundaries, individual
+burn scars, or event timing.
+9
+
+
+5.3
+Transferability, Circularity, and Limitations
+Haryana transfer suggests that the selected optical-change representation was not restricted to the Punjab district
+partitions used for model development. However, the result is geographically narrow: Haryana is adjacent and
+shares broadly similar crop calendars and agricultural landscapes. The temporal contrast is more cautionary. A
+model that transfers across a neighboring state within a comparable seasonal context may still vary substantially
+across years because atmospheric conditions, residue management, crop phenology, and proxy-label coverage
+change.
+Circularity was reduced but not eliminated. Excluding NBR and dNBR prevented the classifier from directly
+reusing the main label threshold, and no-SWIR ablation tested dependence on related spectral information. Yet
+the remaining optical predictors are correlated with the same physical burn process and with label-construction
+variables. This is scientifically appropriate for prediction, but it means internal weak-label metrics cannot be
+interpreted as independent pixel accuracy.
+The optical windows do not bracket every fire in the seasonal reference period. Early burns may affect the earlier
+composite, while late-season scars are not observed by the later composite, which ends on 4 November. VIIRS
+context nevertheless extends through 29 November, and MODIS comprises the October and November monthly
+products. This temporal mismatch limits interpretation of agreement with the seasonal references.
+The main limitations are the absence of an independent human-scored pixel-level reference dataset, heuristic weak
+labels, coarse calibration support, structured district residuals, weak 2023–2024 stability, and a negative result for
+only one simple radar-fusion design. Future work should prioritize independent field or visual reference sampling,
+year-adaptive label and threshold strategies, explicit uncertainty products, and structured temporal or multimodal
+fusion. Until then, the appropriate claim is calibrated regional monitoring under label scarcity, not operationally
+proven scar delineation.
+6
+Conclusion
+This study developed a weakly supervised framework for post-harvest burned-cropland mapping that separates
+label construction, district-held-out learning, and map-level threshold calibration. The most selective pseudo-label
+recipe achieved the highest agreement with its own held-out pseudo-labels; this does not establish improved label
+correctness or independent burned-area accuracy. MLP/very-strict/Set A was the nominal best trained configuration
+(kappa 0.395), but RF, XGBoost, and LightGBM were practically tied within the very-strict recipe.
+For production, RF/very-strict/Set A was retained because it could be deployed natively in Google Earth Engine
+with negligible and statistically non-significant loss relative to MLP. External deployment-threshold calibration was
+necessary: a cutoff of 0.60 yielded district MODIS 𝑅2 of 0.636, an area ratio of 1.005, and fire-count Spearman
+correlation of 0.779, while pixel-level MODIS agreement remained modest. The final evidential scale is therefore
+district burden and hotspot screening rather than exact scar boundaries.
+Early burns may affect the earlier optical composite, and late-season scars are not observed by the later composite
+despite the broader seasonal fire context. Zero-shot transfer to Haryana was promising, but Punjab performance
+differed sharply between 2023 and 2024, and simple Sentinel-1/Sentinel-2 concatenation did not improve the optical
+baseline. The framework therefore provides a defensible route to regional burned-cropland monitoring where labels
+are scarce, provided that pseudo-label recipes are treated as primary model components, deployment thresholds are
+calibrated against external aggregate evidence, and temporal and pixel-level limitations remain explicit. Operational
+use should focus on district-scale burden assessment, hotspot ranking, and screening rather than field-boundary or
+temporally invariant annual mapping. Structured district residuals and year-to-year variation should be reported
+alongside mapped totals, and independent human-scored reference sampling remains necessary before exact scar
+delineation can be claimed. The central methodological implication is that label design, spatially honest evaluation,
+and deployment calibration must be treated as a single evidence chain rather than as separate post-processing
+choices.
+References
+M. Belgiu and L. Drăguţ. Random forest in remote sensing: A review of applications and future directions. ISPRS Journal of Photogrammetry
+and Remote Sensing, 114:24–31, 2016. doi: 10.1016/j.isprsjprs.2016.01.011.
+S. Bhuvaneshwari, H. Hettiarachchi, and J. N. Meegoda. Crop residue burning in india: Policy challenges and potential solutions. International
+Journal of Environmental Research and Public Health, 16(5):832, 2019. doi: 10.3390/ijerph16050832.
+L. Breiman. Random forests. Machine Learning, 45(1):5–32, 2001. doi: 10.1023/A:1010933404324.
+T. Chen and C. Guestrin. Xgboost: A scalable tree boosting system. In Proceedings of the 22nd ACM SIGKDD International Conference on
+Knowledge Discovery and Data Mining, pages 785–794. Association for Computing Machinery, 2016. doi: 10.1145/2939672.2939785.
+10
+
+
+M. Drusch, U. Del Bello, S. Carlier, O. Colin, V. Fernandez, F. Gascon, B. Hoersch, C. Isola, P. Laberinti, P. Martimort, A. Meygret, F. Spoto,
+O. Sy, F. Marchese, and P. Bargellini. Sentinel-2: Esa’s optical high-resolution mission for gmes operational services. Remote Sensing of
+Environment, 120:25–36, 2012. doi: 10.1016/j.rse.2011.11.026.
+L. Giglio, L. Boschetti, D. P. Roy, M. L. Humber, and C. O. Justice. The collection 6 modis burned area mapping algorithm and product. Remote
+Sensing of Environment, 217:72–85, 2018. doi: 10.1016/j.rse.2018.08.005.
+H. Jethva, O. Torres, R. D. Field, A. Lyapustin, R. Gautam, and V. Kayetha. Connecting crop productivity, residue fires, and air quality over
+northern india. Scientific Reports, 9:16594, 2019. doi: 10.1038/s41598-019-52799-x.
+N. Karasiak, J.-F. Dejoux, C. Monteil, and D. Sheeren. Spatial dependence between training and test sets: Another pitfall of classification
+accuracy assessment in remote sensing. Machine Learning, 111:2715–2740, 2022. doi: 10.1007/s10994-021-05972-1.
+G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T.-Y. Liu. Lightgbm: A highly efficient gradient boosting decision tree. In
+Advances in Neural Information Processing Systems, volume 30, pages 3146–3154, 2017.
+R. Lan, S. D. Eastham, T. Liu, L. K. Norford, and S. R. H. Barrett. Air quality impacts of crop residue burning in india and mitigation alternatives.
+Nature Communications, 13:6537, 2022. doi: 10.1038/s41467-022-34093-z.
+T. Liu, L. J. Mickley, S. Singh, M. Jain, R. S. DeFries, and M. E. Marlier. Crop residue burning practices across north india inferred from household
+survey data: Bridging gaps in satellite observations. Atmospheric Environment: X, 8:100091, 2020. doi: 10.1016/j.aeaoa.2020.100091.
+T. Long, Z. Zhang, G. He, W. Jiao, C. Tang, B. Wu, X. Zhang, G. Wang, and R. Yin. 30 m resolution global annual burned area mapping based
+on landsat images and google earth engine. Remote Sensing, 11(5):489, 2019. doi: 10.3390/rs11050489.
+A. Ratner, S. H. Bach, H. Ehrenberg, J. Fries, S. Wu, and C. Ré. Snorkel: Rapid training data creation with weak supervision. The VLDB
+Journal, 29:709–730, 2020. doi: 10.1007/s00778-019-00552-1.
+D. R. Roberts, V. Bahn, S. Ciuti, M. S. Boyce, J. Elith, G. Guillera-Arroita, S. Hauenstein, J. J. Lahoz-Monfort, B. Schröder, W. Thuiller, D. I.
+Warton, B. A. Wintle, F. Hartig, and C. F. Dormann. Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic
+structure. Ecography, 40(8):913–929, 2017. doi: 10.1111/ecog.02881.
+E. Roteta, A. Bastarrika, M. Padilla, T. Storm, and E. Chuvieco. Development of a sentinel-2 burned area algorithm: Generation of a small fire
+database for sub-saharan africa. Remote Sensing of Environment, 222:1–17, 2019. doi: 10.1016/j.rse.2018.12.011.
+D. P. Roy, H. Huang, L. Boschetti, L. Giglio, L. Yan, H. K. Zhang, and Z. Li. Landsat-8 and sentinel-2 burned area mapping: A combined sensor
+multi-temporal change detection approach. Remote Sensing of Environment, 231:111254, 2019. doi: 10.1016/j.rse.2019.111254.
+M. Sali, E. Piaser, M. Boschetti, P. A. Brivio, G. Sona, G. Bordogna, and D. Stroppiana. A burned area mapping algorithm for sentinel-2 data
+based on approximate reasoning and region growing. Remote Sensing, 13(11):2214, 2021. doi: 10.3390/rs13112214.
+W. Schroeder, P. Oliva, L. Giglio, and I. A. Csiszar. The new viirs 375 m active fire detection data product: Algorithm description and initial
+assessment. Remote Sensing of Environment, 143:85–96, 2014. doi: 10.1016/j.rse.2013.12.008.
+G. Singh, Y. Kant, and V. K. Dadhwal. Remote sensing of crop residue burning in punjab (india): A study on burned area estimation using
+multi-sensor approach. Geocarto International, 24(4):273–292, 2009. doi: 10.1080/10106040802556181.
+R. Torres, P. Snoeij, D. Geudtner, D. Bibby, M. Davidson, E. Attema, P. Potin, B. Rommen, N. Floury, M. Brown, I. N. Traver, P. Deghaye,
+B. Duesmann, B. Rosich, N. Miranda, C. Bruno, M. L’Abbate, R. Croci, A. Pietropaolo, et al. Gmes sentinel-1 mission. Remote Sensing of
+Environment, 120:9–24, 2012. doi: 10.1016/j.rse.2011.05.028.
+Y. Wang, X. Ma, Z. Chen, Y. Luo, J. Yi, and J. Bailey. Symmetric cross entropy for robust learning with noisy labels. In Proceedings of the
+IEEE/CVF International Conference on Computer Vision, pages 322–330, 2019. doi: 10.1109/ICCV.2019.00041.
+D. Zanaga, R. Van De Kerchove, D. Daems, W. De Keersmaecker, C. Brockmann, G. Kirches, J. Wevers, O. Cartus, M. Santoro, S. Fritz,
+M. Lesiv, M. Herold, N. E. Tsendbazar, P. Xu, F. Ramoino, and O. Arino. ESA WorldCover 10 m 2021 v200. Zenodo, 2022.
+11
