@@ -54,11 +54,11 @@
     <strong class="dpr-home-dashboard-count">共 1 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-13 01:22:15 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-13 23:18:55 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,7 +69,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日速读 1 篇，聚焦标签稀缺下的收获后焚烧耕地制图。唯一入选的《Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity》（6.0/10）值得关注的是用校准弱监督缓解标注不足，提升焚烧耕地识别。普通读者若关心农业遥感，可留意弱监督方法在少标签场景的落地效果。</p>
+<p>今日速读1篇、精读0篇，唯一入选的是6.0分《Calibrated Weak Supervision for Post-Harvest Burned-Cropland Mapping Under Label Scarcity》。</p>
+<p>最值得看的是“标签稀缺下校准弱监督”用于收获后烧毁农田制图这一方向，关注它如何缓解标注不足。</p>
+<p>普通读者可先读摘要和实验设置，再判断这套弱监督校准思路是否适用于自己关心的区域与数据。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
