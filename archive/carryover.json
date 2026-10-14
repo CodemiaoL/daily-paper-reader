@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-13T23:18:54.564021+00:00",
-  "updated_date": "20261013",
+  "generated_at": "2026-10-14T22:17:01.449587+00:00",
+  "updated_date": "20261014",
   "carryover_days": 9,
   "tag_states": {
     "transit-lucc": {
-      "updated_date": "20261013",
+      "updated_date": "20261014",
       "carryover_days": 9,
       "items": []
     }

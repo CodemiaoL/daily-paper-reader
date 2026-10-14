@@ -1,0 +1,41 @@
+{
+  "date": "20261014",
+  "date_label": "",
+  "generated_at": "2026-10-14 22:17:35 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.15813v1",
+      "route": "202610/14/2610.15813v1-changet3-evaluating-vision-test-time-training-for-remote-sensing-change-detection",
+      "title": "ChangeT$^3$: Evaluating Vision Test-Time Training for Remote Sensing Change Detection",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "保留空间细节的双时相遥感变化检测",
+      "first_seen_at": "2026-10-14 22:17:35 UTC",
+      "updated_at": "2026-10-14 22:17:35 UTC"
+    },
+    {
+      "paper_id": "2610.18624v1",
+      "route": "202610/14/2610.18624v1-majortomelliot-pretrain-a-multi-sensor-multi-temporal-pretraining-dataset-for-earth-observation",
+      "title": "MajorTOM:Elliot Pretrain, A Multi-Sensor, Multi-Temporal Pretraining Dataset for Earth Observation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "多传感器对地观测数据集，含ESA WorldCover土地覆盖产品",
+      "first_seen_at": "2026-10-14 22:17:35 UTC",
+      "updated_at": "2026-10-14 22:17:35 UTC"
+    }
+  ]
+}

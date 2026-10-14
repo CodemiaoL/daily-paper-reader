@@ -1,0 +1,468 @@
+Title: ChangeT^3: Evaluating Vision Test-Time Training for Remote Sensing Change Detection
+
+URL Source: https://arxiv.org/pdf/2610.15813v1
+
+Published Time: Wed, 14 Oct 2026 02:00:54 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+> 1
+
+# ChangeT 3: Evaluating Vision Test-Time Training for Remote Sensing Change Detection 
+
+Sharukshan Niranjan 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka n.sharukshan@gmail.com 
+
+Oshadha Samarakoon 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka e21345@eng.pdn.ac.lk 
+
+Nichula Wasalathilaka 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka e20425@eng.pdn.ac.lk 
+
+Roshan Godaliyadda 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka roshang@eng.pdn.ac.lk 
+
+Parakrama Ekanayake 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka mpbe@eng.pdn.ac.lk 
+
+Vijitha Herath 
+
+University of Peradeniya 
+
+Peradeniya, Sri Lanka vijitha@ee.pdn.ac.lk 
+
+Abstract —Bitemporal remote sensing change detection re-quires representations that preserve spatial detail while capturing contextual information relevant to changes between acquisitions. Visual test-time training offers an alternative to explicit token-to-token attention by adapting a compact inner model to each image. This letter describes ChangeT 3, a vanilla Siamese configuration combining the existing hierarchical ViT 3-Tiny encoder with the multiscale ChangeFormer decoder. The two image streams share learned encoder parameters, while their fast weights are com-puted independently from their respective spatial features. Each encoder block retains the inherited global simplified SwiGLU and local adaptive depthwise-convolution branches. Temporal comparison is performed by the decoder through learned fusion of paired features at four resolutions, followed by coarse-to-fine aggregation and binary prediction. This separation provides a direct setting for examining image-conditioned inner updates without introducing an additional temporal interaction module. Trained from scratch on LEVIR-CD+ with the same decoder, recipe, and budget as a ChangeFormer control, ChangeT 3 reaches an F1 of 80.61 ±0.90 against 78.84 ±0.21 for ChangeFormer (three seeds each); as in the standard protocol for this dataset, checkpoints are selected on the test split. Trained with both inner updates disabled, the same encoder reaches 78.63 ±0.20. Neither model transfers zero-shot to SYSU-CD, DSIFN-CD, or WHU-CD, and ChangeT 3 is the slower of the two at small inputs despite similar parameter and operation counts. 
+
+Index Terms —Remote sensing, change detection, test-time training, Siamese networks, multiscale features. 
+
+I. I NTRODUCTION 
+
+# BUILDING change detection from bitemporal remote sensing imagery supports the monitoring of urban de-velopment and the updating of geographic information. Given two co-registered observations, the objective is to distinguish changes in the target structures from variations in appearance that do not alter their change labels. Illumination, shadows, seasonal conditions, and differences in acquisition geometry can complicate this distinction. Accurate dense prediction therefore requires both localized structural information and a representation of the surrounding scene. Building-change benchmarks such as LEVIR-CD and its extension provide a setting for studying this problem [1], [2]. Siamese encoders provide a natural starting point by ex-tracting features from each date using shared parameters. Fully convolutional Siamese networks established practical early- and feature-fusion formulations [3]. Subsequent work has sought richer contextual and object-level representations. For example, DTCDSCN combines change detection with semantic segmentation supervision [4]. Transformer-based ap-proaches offer another route to contextual reasoning. BIT summarizes bitemporal features into a compact set of semantic tokens [5], whereas ChangeFormer combines a hierarchical Transformer encoder with multiscale learned difference fea-tures and a decoder [6]. Semantic change detection, which also labels the land-cover classes involved, has added attention modules and a Dice loss to SCanNet [7] and combined spatio-frequency feature fusion with change-guided attention [8]. These designs illustrate that the representation used before temporal comparison is a central architectural choice. The cost of spatial context modeling also matters for high-resolution inputs. Full self-attention forms pairwise relations between tokens, although practical architectures can reduce this cost through token reduction or other restrictions. Linear-complexity alternatives have consequently attracted attention in change detection. LSAT uses cross-dimension interactions and structure-aware enhancement [9]; ChangeMamba inves-tigates state-space modeling for spatial and temporal rep-resentations [10], and precision fusion blocks added to it capture channel-wise temporal variations and per-pixel differ-ences [11]; MambaRefine-CD pairs a MambaVision encoder with region-boundary temporal refinement [12]; and ChangeR-WKV combines a hierarchical RWKV encoder with spatial-temporal fusion [13]. Their differing fusion mechanisms mean that an alternative token mixer must be assessed as part of a clearly specified change-detection pipeline, rather than being credited with improvements demonstrated by another architecture. Controlled benchmarks that hold everything but the backbone fixed, and that also report boundary quality and behavior under domain shift, make such an assessment possible [14]. Test-time training (TTT) was introduced to adapt a model to each test input through a self-supervised auxiliary task [15], [16], alongside fully test-time adaptation methods that update a deployed model without labels [17], [18]. TTT layers in-arXiv:2610.15813v1 [cs.CV] 11 Oct 2026 2
+
+(a) Siamese H-ViT 3 encoder (b) Temporal-difference decoder (ChangeFormer) (c) Inside every H-ViT 3 block: a test-time-trained layer, fitted per image 
+
+pre-change IA
+
+post-change IB
+
+> Stem  ↓4Stem  ↓4
+> ↓2
+> ↓2
+> ↓2
+> ↓2
+> ↓2
+> ↓2
+
+S1 ×1
+
+> C=64
+
+S2 ×3
+
+> C=128
+
+S3 ×9
+
+> C=320
+
+S4 ×4
+
+> C=512
+
+shared 
+
+θ, W 0
+
+W ⋆A
+
+W ⋆B̸
+
+=  
+
+> {F lA}4
+> l=1
+> {F lB}4
+> l=1
+> H
+> 4
+> H
+> 8
+> H
+> 16
+> H
+> 32
+> shared by A, B
+
+MLP 1 c ConvDiff 1
+
+MLP 2 c ConvDiff 2
+
+MLP 3 c ConvDiff 3
+
+MLP 4 c ConvDiff 4+++
+
+> ↑2×↑2×↑2×
+
+D1
+
+> 1
+
+D2
+
+> 2
+
+D3
+
+> 3
+
+D4
+
+> 4
+> upsample all  Dl to  H
+> 4 & concatenate
+
+Conv 1×1 + BN 
+
+↑2 ConvT + Res 
+
+↑2 ConvT + Res Conv 3×3 → 2
+
+> H
+> 4
+> H
+> 2
+> H
+
+change map 
+
+ˆY 
+
+> Deep supervision
+> training only CE: 4 heads + ˆYw: .5/.5/.5/.8/1
+
+Persistent vs. temporary state       
+
+> persistent , trained on the dataset:
+> W0,WQKV ,Wproj ,other layers
+> temporary W ⋆: one image, one forward pass, then discarded
+> W0(K, V )A
+> (K, V )BW ⋆AW ⋆B
+
+̸
+
+=   
+
+> No labels and no cross-date tokens enter the inner step; the dates meet only in (b).
+> ∇L CD reaches W0through the step.
+
+H-ViT 3 block 
+
+DWConv 3×3 (CPE) 
+
+> +
+
+LN, TTT layer 
+
+> +
+
+LN, ConvFFN  
+
+> +
+> ×Nlper stage
+
+TTT layer: write a fast model from (K, V ), then read it with QX 
+
+> N×C
+> WQKV  (persistent)
+> Qg Kg Vg QℓKℓVℓ
+> RoPE
+
+write W0 → W ⋆  
+
+> SwiGLU, hheads
+
+write W0 → W ⋆  
+
+> 3×3depthwise kernel
+> W ⋆
+> 1, W ⋆
+> 2
+> W ⋆
+> 3
+
+read 
+
+(Qg W ⋆ 
+
+> 1
+
+) ⊙ SiLU( Qg W ⋆ 
+
+> 2
+
+)
+
+read 
+
+DWConv 3×3(Qℓ; W ⋆ 
+
+> 3
+
+)
+
+Linner (W ) = − 13N
+
+P
+
+> i
+
+⟨FW (Ki), V i⟩
+
+W ⋆ = W0 − η G/ (∥G∥ + 1)  
+
+> c
+
+Wproj    
+
+> C+32 →C
+
+O    
+
+> ∇L CD flows back through the inner step into W0and WQKV
+
+pre-change features post-change features per-image fast state c concatenate + add training only outer (change-detection) gradient 
+
+Fig. 1. Overview of ChangeT3. (a) A Siamese hierarchical ViT 3 encoder (H-ViT 3-Tiny) maps the pre- and post-change images to four-scale features with 
+
+shared persistent weights θ. Inside every block, each image fits its own temporary fast weights W ⋆, so W ⋆A̸ = W ⋆B in general and no information crosses dates in the encoder. (b) The ChangeFormer decoder projects each scale with an MLP shared across dates, concatenates the pair, and learns a temporal difference (ConvDiff: Conv 3×3–ReLU–BN–Conv 3×3–ReLU); coarser differences are upsampled and added, all scales are fused at H 
+
+> 4
+
+, and two transposed-conv residual stages recover full resolution. Dashed heads are used only for deep supervision. (c) A TTT layer first writes : one label-free gradient step on (K, V ), with 
+
+G = ∇W Linner (W0), turns the persistent initialization W0 into fast weights W ⋆ (a simplified-SwiGLU model per head and a 3×3 depthwise kernel; 
+
+η = 1 , gradient norm taken per head and per kernel), and then reads them with Q. The change-detection loss trains W0 and all other persistent weights end to end through the inner step. 
+
+stead build the adaptation into the architecture: they represent context through the parameters of a small inner model that is updated using the input sequence [19], a view closely related to fast-weight programmers [20] and since extended to large-chunk updates [21] and learned test-time memory [22], which ChangeTitans has applied to change detection [23]. The visual ViT 3 architecture adapts this principle to images through full-batch spatial updates and complementary global and local inner models [24]. Unlike a fixed feature transformation, the effective inner weights depend on the current image. However, per-image adaptation does not itself compare acquisitions: independently adapted date features must still be combined to produce a change map. Whether this representation is ben-eficial for building-change detection is therefore an empirical question. This letter develops a deliberately unmodified encoder– decoder configuration for examining that question. ChangeT 3
+
+uses a shared hierarchical ViT 3-Tiny encoder and the existing ChangeFormer V6 decoder. Each date generates its own fast weights; no temporal exchange is inserted into the encoder. The method description distinguishes these image-conditioned weights from shared learned parameters and identifies the decoder as the point of temporal fusion. The accompanying evaluation structure isolates the global and local inner up-dates while retaining the decoder. These are an architectural adaptation and an experimental study design, rather than new inner models or a new temporal-fusion mechanism. On LEVIR-CD+, the encoder with active inner updates exceeds a ChangeFormer control that shares its decoder, recipe, and budget, whereas the same encoder trained without updates does not (Section III). That advantage does not carry over to zero-shot evaluation on other datasets, where every model trained only on LEVIR-CD+ fails (Section III-E). II. M ETHOD 
+
+A. Siamese Multiscale Representation 
+
+Let IA, I B ∈ R3×H×W be a co-registered image pair and 
+
+Y ∈ { 0, 1}H×W its binary change mask. A single encoder Eθ
+
+is applied separately to both images: 
+
+{F it }4
+
+i=1 = Eθ (It), t ∈ { A, B }. (1) 3
+
+For dimensions divisible by 32, F it ∈ RCi×H/s i×W/s i , where 
+
+si = 2i+1 . The stage widths are (64 , 128 , 320 , 512) , the block depths are (1 , 3, 9, 4) , and the global head counts are 
+
+(2 , 4, 10 , 16) . Thus every global head has width d = 32 . A convolutional stem and successive patch-merging operations reduce the spatial resolution; stage-specific layer normalization produces the four decoder inputs. The diagram in Fig. 1 separates shared parameterization from independent date pro-cessing. In each block, a residual 3 × 3 depthwise convolution first provides conditional positional information. A pre-normalized TTT module and a pre-normalized spatial feed-forward mod-ule then operate through residual connections. Suppressing stochastic-depth operators for readability, the block is 
+
+Xp = X + DWConv pos (X),Xm = Xp + TTT(LN( Xp)) ,Xout = Xm + MLP sp (LN( Xm)) . (2) Spatial reshaping is implicit. The spatial MLP contains channel projections and an intermediate residual depthwise convolu-tion. These fixed learned convolutions are distinct from the adaptive local convolution inside the TTT module. 
+
+B. Independent Image-Conditioned Inner Updates 
+
+At a particular block, let X ∈ RN ×C denote normalized tokens from one image, with N = HiWi. A learned projection produces global (Qg , K g , V g ) with C channels each and local 
+
+(Qℓ, K ℓ, V ℓ) with d channels each. Two-dimensional rotary positional encoding is applied to global queries and keys before head-wise processing. The global tensors are arranged into h heads of width d = C/h , while local tensors retain their two-dimensional spatial organization. For one global head, the inherited simplified SwiGLU inner model is 
+
+fWg (U ) = ( U W 1) ⊙ SiLU( U W 2), Wg = ( W1, W 2), (3) where W1, W 2 ∈ Rd×d and ⊙ denotes elementwise multipli-cation. This inner model has no additional output matrix. In parallel, the local inner model applies a depthwise convolution, 
+
+fWℓ (U ) = DWConv 3×3(U ; Wℓ), (4) with one spatial kernel per local channel and padding that preserves resolution. Both branches use the inherited negative dot-product objec-tive [24]. For a global head it is 
+
+Lg (Wg ; Kg , V g ) = − sN
+
+> N
+
+X
+
+> n=1
+
+fWg (Kg )n, V g,n . (5) For local channel c, the corresponding loss is −s/N times the sum of fWℓ (Kℓ)c,u,v Vℓ,c,u,v over spatial positions. Each local kernel is updated from its own channel. The implementation uses the inherited scale s = 9 −1/2 in both branches; the value 9 is the kernel area, not the global head width. The inner targets are learned value projections, not change-mask labels. For branch b ∈ { g, ℓ } and image t, one update produces 
+
+W ⋆t,b = W0,b − ηbRb(∇W Lt,b (W0,b )) . (6) Here W0,b is a learned initialization and Rb is the gradient rescaling used by the implementation. Each column vector g of a global matrix gradient is transformed into g/ (1+ ∥g∥2). Each local kernel gradient G is transformed into G/ (1 + ∥G∥F ).Equation (6) therefore does not represent an unmodified gradient-descent step. The vanilla code uses ηg = ηℓ = 1 .These are inner architectural step sizes, distinct from the outer optimizer learning rate. The update uses all spatial positions of the current image. It neither pools keys and values across training examples nor combines dates. The fast weights for A and B start from the same learned initialization but are computed independently. They are temporary tensors and do not replace the persistent model parameters during inference. The module then evaluates the queries: 
+
+O = Po
+
+
+
+Cat 
+
+h
+
+fW ⋆t,g (Qg ), f W ⋆t,ℓ (Qℓ)
+
+i 
+
+. (7) The global heads are reassembled and the local map is flattened before concatenation. Consequently, Po maps C + d
+
+channels back to C.The gradients in (6) are computed analytically with dif-ferentiable tensor operations. Outer supervised training can differentiate through these operations, while inference does not require an outer optimizer step or ground-truth labels. The global branch can condition an output location on all image tokens through its fast weights. The local branch applies a spatially local query transformation, although its adaptive kernel is itself conditioned on the whole spatial map. This distinction is important: “local” describes the convolutional query operator, not an exclusively local source of adaptation. 
+
+C. Learned Temporal Decoding and Supervision 
+
+The ChangeFormer V6 decoder [6] receives the paired pyramids. At scale i, a shared linear projection Pi maps both dates to a common decoder width D:
+
+Ai = Pi(F iA), Bi = Pi(F iB ). (8) All runs use D = 256 . A learned convolutional differ-ence block ϕi transforms the ordered concatenation [Ai, B i].Coarse-to-fine decoding is 
+
+D4 = ϕ4(Cat[ A4, B 4]) ,Di = ϕi(Cat[ Ai, B i]) + Ui+1 →i(Di+1 ), i = 3 , 2, 1. (9) The interpolation operator U uses bilinear resizing. Each difference block contains convolution, activation, and normal-ization operations. Thus the decoder learns how to compare temporal features; it does not simply compute an absolute difference. Likewise, shared encoder weights alone do not guarantee exact invariance of the complete prediction to swap-ping the input dates. All Di are aligned to the finest decoder grid and fused: 
+
+Df = ψ(Cat[ U4→1(D4), U3→1(D3), U2→1(D2), D 1]) , (10) where ψ is a 1 × 1 convolution followed by batch normaliza-tion. Two transposed-convolution upsampling stages, each fol-lowed by residual refinement, restore the spatial resolution. A 4
+
+final convolution predicts two logits per pixel. The integration restores the original input extent by cropping padded outputs when possible, or by interpolation otherwise. The final mask is obtained by the class-wise argmax of the final logits; any use of multiscale inference must be documented separately. Four auxiliary heads produce predictions at the decoder scales. With deep supervision enabled, the outer objective is 
+
+Lsup =
+
+> 5
+
+X
+
+> j=1
+
+λj CE( Zj , Sj (Y )) , (11) where (Z1, . . . , Z 5) correspond to scales (4 , 3, 2, 1) and the fi-nal output. The operator Sj resizes labels to the prediction grid using nearest-neighbor interpolation; cross-entropy consumes raw two-class logits. The coefficients are (λ1, . . . , λ 5) =(0 .5, 0.5, 0.5, 0.8, 1) . This outer loss jointly trains the encoder initialization, feature projections, and decoder. It is separate from the unlabeled inner objective in (5). 
+
+D. Computational Scope 
+
+For fixed channel dimensions and one inner update, the global inner-model operations scale as O(N hd 2) and the local kernel operations as O(N dk 2), with k = 3 . Channel projec-tions and the spatial feed-forward operations are also linear in 
+
+N at fixed widths. Applying the shared encoder twice doubles its per-image work without doubling its learned parameters. This inherited token-linear structure avoids constructing a full 
+
+N × N attention matrix, but it does not by itself establish lower measured latency, memory use, or parameter count than a competing detector. End-to-end profiling must include both date passes, inner-update arithmetic, and decoding. III. E XPERIMENTS 
+
+A. Dataset and Evaluation Protocol 
+
+The benchmark is LEVIR-CD+, the extended building-change dataset linked by the LEVIR authors [1], [2], in its 256 ×256 patch release: each 1024 ×1024 scene pair is cut into 16 non-overlapping patches with stride 256. The 637 training scenes yield 10,192 training patches and the other 348 scenes yield 5,568 test patches, so training and test scenes are disjoint. In this release, as in the literature that uses it, the validation set is a byte-identical copy of the test set (identical file lists and mask checksums). Every score reported here is therefore a validation score in the strict sense, and no independent test estimate exists. Images are normalized with ImageNet statistics, masks are binarized at 127, and no data augmentation is applied. Change-class precision, recall, F1, and intersection over union (IoU) will summarize pixel-level predictions. With true positives TP , false positives FP , and false negatives FN , their definitions are 
+
+P = TP
+
+TP + FP
+
+, R = TP
+
+TP + FN
+
+,F1 = 2TP
+
+2TP + FP + FN
+
+, IoU = TP
+
+TP + FP + FN
+
+. (12)                             
+
+> TABLE I TRAINING AND EVALUATION SETTINGS SHARED BY ALL RUNS .
+> Data
+> Dataset LEVIR-CD+, 256 ×256 patches, stride 256 Patches 10,192 train / 5,568 test (val =test) Scenes 637 train / 348 test, disjoint Preprocessing ImageNet normalization; masks binarized at 127; no augmentation
+> Optimization
+> Optimizer AdamW ( β1=0 .9,β2=0 .999 ), one parameter group Learning rate 1×10 −4, linear per-iteration decay to 0 Weight decay 0.01 Budget 50k iterations, batch size 8 Loss Cross-entropy on 5 outputs, weights (0.5, 0.5, 0.5, 0.8, 1) Precision fp32, deterministic cuDNN
+> Model
+> Decoder ChangeFormer V6, width 256 Stochastic depth 0.2 (ChangeT 3); 0.1 (ChangeFormer encoder) Initialization Scratch; ChangeT 3-P: ImageNet H-ViT 3-T, layer decay 0.8 (one run); ChangeFormer-P: ADE20K SegFormer MiT-B2 Seeds 42; ChangeFormer, ChangeT 3, and ChangeT 3
+> w/o updates also 1 and 2
+> Selection and evaluation
+> Selection Best F1, evaluated every 1,274 iterations; no early stopping Inference Argmax of the final head, single scale, no TTA Metrics Dataset-level P,R,F1, IoU; BF1 at 2 px Hardware NVIDIA RTX 6000 Ada
+
+The counts are accumulated over every pixel of all 5,568 test patches before the ratios are formed (dataset-level aggrega-tion). No pixels are ignored, and a constant ϵ = 10 −8 is added to each denominator. Evaluation runs on the 256 ×256 patches; scenes are not reconstructed. We also report boundary 
+
+F1 (BF1) with a tolerance of 2 pixels. 
+
+B. Implementation and Comparisons 
+
+Table I lists the training and evaluation settings; every run shares them, and runs differ only in the encoder, its initialization, the inner step sizes, or the seed. The deep-supervision weights apply from the coarsest output to the full-resolution head. ChangeFormer, ChangeT 3, and ChangeT 3
+
+without inner updates are each trained with two seeds beyond seed 42 to measure run-to-run spread. ChangeT 3-P initializes the encoder from the ImageNet-pretrained H-ViT 3-T weights released with [24], once without and once with layer-wise learning-rate decay. ChangeFormer-P initializes its encoder from SegFormer MiT-B2 pretrained on ADE20K, the source the ChangeFormer authors used; since their converted file is no longer available, the released SegFormer weights are mapped by name, and the three 3 × 3 patch-embedding kernels are embedded at the centre of the encoder’s 7 × 7 kernels, which reproduces their output exactly. In every pretrained run only the encoder is initialized; the decoder is trained from scratch. ChangeFormer, the only baseline, is trained under exactly this protocol: it shares the decoder, loss, optimizer, schedule, and budget of ChangeT 3, so the two differ only in the encoder 5                                                  
+
+> TABLE II LEVIR-CD+ RESULTS (%). C HANGE FORMER AND CHANGE T3SHARE DECODER ,RECIPE ,AND BUDGET . S CORES ARE ON THE TEST SPLIT ,WHICH ALSO SERVED FOR CHECKPOINT SELECTION (TEST -AS -VAL PROTOCOL ). S EED ROWS GIVE MEAN ±STANDARD DEVIATION . P RETRAINED ROWS DIFFER IN PRETRAINING DATA AS WELL AS ENCODER .Method Init. Params (M) PRF1IoU BF1 ChangeFormer (3 seeds) scratch 41.03 77.03 ±1.17 80.76 ±0.83 78.84 ±0.21 65.07 ±0.29 70.58 ±0.21 ChangeT 3(3 seeds) scratch 40.28 80.54 ±1.86 80.70 ±0.68 80.61 ±0.90 67.52 ±1.26 72.69 ±0.67 ChangeFormer-P ADE20K 41.03 84.01 83.95 83.98 72.38 79.30 ChangeT 3-P ImageNet 40.28 86.65 83.90 85.25 74.29 78.24 ChangeT 3-P + layer decay ImageNet 40.28 87.34 83.38 85.31 74.39 78.47
+
+(Table II). It is our run of the ChangeFormer encoder [6] under this recipe, not the score reported by its authors. Over three seeds each, ChangeT 3 reaches 80.61 ±0.90 F1 and Change-Former 78.84 ±0.21, a margin of 1.77 points. ChangeFormer’s seed spread is the smaller of the two, and the margin exceeds either spread. The two models have similar sizes, 40.28 M and 41.03 M parameters. Pretraining helps both encoders: ChangeFormer-P reaches 83.98 and ChangeT 3-P 85.25–85.31. These rows are listed separately, and they are not a controlled comparison of encoders: the two start from different data and tasks (ADE20K segmentation versus ImageNet classification), and each is a single seed. 
+
+C. Controlled Inner-Update Ablations 
+
+Table III defines a planned factorial study of the global and local inner updates. Setting a step size to zero retains that branch and its learned initialization; it does not remove the branch. Independently training each configuration tests adaptation within the learning system, whereas changing a step size only at inference probes reliance of a particular checkpoint on its updates. These protocols will be reported separately; Table III covers the first. All four configurations use seed 42 and are otherwise identi-cal. Training with both updates gives an F1 of 81.64, the global update alone 80.18, the local update alone 80.80, and neither 78.73. Relative to no update, the global update alone is worth 1.45 points, the local update alone 2.07, and both together 2.91. Seed 42 is the strongest of the three ChangeT 3 seeds, so the seed means are the fairer comparison: 80.61 ±0.90 with both updates against 78.63 ±0.20 without, a gap of 1.97 points that is well outside either spread. Either update alone already recovers most of that gap. The single-branch runs have one seed each and fall within the full model’s seed spread, so these data do not separate the two branches. Without updates, ChangeT 3 scores at the level of ChangeFormer (78.63 against 78.84). 
+
+D. Qualitative Evidence 
+
+Figure 2 shows four LEVIR-CD+ test patches chosen by a fixed rule from the first 100 test images: a change fraction between 2% and 40%, at least one changed component of 64 pixels or more, an F1 of at least 0.5 for the better ChangeT 3 variant, and, among those, the largest F1 margin over ChangeFormer, taking at most one patch per source scene. Because the rule selects for cases where ChangeT 3 is                                         
+
+> TABLE III TRAINING -TIME INNER -UPDATE ABLATIONS ON LEVIR-CD+ (%). T HE UPPER BLOCK IS SEED 42; THE LOWER BLOCK GIVES MEAN ±STANDARD DEVIATION OVER SEEDS . A ZERO STEP SIZE KEEPS THE BRANCH AND ITS LEARNED INITIALIZATION BUT APPLIES NO UPDATE . B EST ITER .IS THE SELECTED CHECKPOINT .Configuration ηgηℓF1IoU Best iter. Both (vanilla) 1181.64 68.97 43k Global only 1080.18 66.91 48k Local only 0180.80 67.79 28k Neither 0078.73 64.92 38k Both (3 seeds) 1180.61 ±0.90 67.52 ±1.26 –Neither (3 seeds) 0078.63 ±0.20 64.79 ±0.27 –
+
+ahead, the figure illustrates error types rather than measuring an advantage. All predictions are read from the cached outputs of the evaluation, not re-run for the figure. 
+
+E. Zero-Shot Cross-Domain Evaluation 
+
+Following domain-shift analyses of remote-sensing back-bones [14], every model trained on LEVIR-CD+ is also evaluated, without any tuning, on the test splits of SYSU-CD (4,000 pairs), DSIFN-CD (48), and WHU-CD (762). The checkpoint is the one selected on LEVIR-CD+ and the decision is the argmax of the two-class logits; nothing is selected or calibrated on a target. SYSU-CD and WHU-CD pairs are 256 ×256 and used as they are. DSIFN-CD pairs are 512 ×512; they are cut into four non-overlapping 256 ×256 tiles at native resolution, and the stitched predictions are scored on the full images. Resizing them to 256 ×256 instead, as earlier code bases do, lowers every model’s score and leaves the conclusions unchanged. Table IV reports the scores. Every model trained from scratch is near the floor on every target: the mean F1 over the three targets is 6.64 for ChangeFormer, 3.57 for ChangeT 3
+
+without updates, and 1.83 for ChangeT 3, so the inner update that helps in-domain does not help here, and ChangeT 3 is the lowest of the three. The failure is one of recall. On SYSU-CD, ChangeT 3 marks 0.20% of the pixels as changed against 23.6% in the reference, with a precision of 0.68 and a recall of 0.006; DSIFN-CD and WHU-CD show the same pattern. Differences in what each dataset labels as change may contribute on SYSU-CD and DSIFN-CD, whose labels cover more than buildings, but WHU-CD labels building changes as LEVIR-CD+ does and shows the same collapse, so label definitions alone do not explain it. Pretraining helps most: 6Reference         
+
+> T1 T2 GT ChangeFormer
+> [Transformer]
+> ChangeFormer-P
+> [Transformer, pretr.]
+> ChangeT 3w/o TTT
+> [ViT 3,η= 0]
+> ChangeT 3
+> [ViT 3+ TTT]
+> ChangeT 3-P
+> [ViT 3+ TTT, pretr.]
+> (a) (b) (c) (d)
+
+Change map: TP TN FP FN Boundary: reference prediction overlap Fig. 2. Qualitative comparison on the LEVIR-CD+ test split. Samples (a)–(d) are the four highest-ranked test patches from distinct scenes under the selection rule of Section III. For each sample, the upper row shows the change prediction as an error map, where white, black, red and blue denote true positive, true negative, false positive and false negative pixels. The lower row shows structural agreement between the reference contour (green) and the predicted contour (red), with yellow indicating overlap. ChangeFormer and ChangeT 3 share the same decoder and training recipe; they differ only in the encoder and in whether its per-image test-time update is active. The -P variants initialize the encoder from pretrained weights (ADE20K for ChangeFormer, ImageNet for ChangeT 3). 
+
+the cross-domain mean reaches 13.90 for ChangeT 3-P with layer decay and 9.23 for ChangeFormer-P, mainly through WHU-CD. These are single-source, zero-shot results with no adaptation, which is the setting a test-time adaptation method would have to address [17], [18]. 
+
+F. Efficiency 
+
+Table V compares cost on one RTX 6000 Ada Generation GPU in fp32, over 20 warm-up and 100 timed forward passes of an image pair with synchronization. The two models have nearly the same parameter counts and operation counts (284.4 and 277.5 GFLOPs at 256 ×256, counting the analytical inner-7
+
+TABLE IV ZERO -SHOT CROSS -DOMAIN EVALUATION (%) OF MODELS TRAINED ONLY ON LEVIR-CD+. S EED ROWS GIVE MEAN ±STANDARD DEVIATION .CROSS -DOMAIN MEAN F1 AVERAGES THE THREE TARGETS ; DROP IS IN -DOMAIN F1 MINUS THAT MEAN .                                                                            
+
+> LEVIR-CD+ (in-domain) SYSU-CD DSIFN-CD WHU-CD Cross-domain Model F1IoU F1IoU F1IoU F1IoU mean F1drop ChangeFormer (3 seeds) 78.84 ±0.21 65.07 ±0.29 2.23 ±0.32 1.13 ±0.17 15.86 ±1.33 8.62 ±0.79 1.84 ±1.08 0.93 ±0.55 6.64 ±0.40 72.20 ±0.62 ChangeT 3w/o TTT (3 seeds) 78.63 ±0.20 64.79 ±0.27 0.80 ±0.21 0.40 ±0.10 7.97 ±0.62 4.15 ±0.34 1.92 ±0.88 0.97 ±0.45 3.57 ±0.22 75.07 ±0.38 ChangeT 3(3 seeds) 80.61 ±0.90 67.52 ±1.26 0.87 ±0.36 0.44 ±0.18 3.41 ±0.73 1.73 ±0.38 1.22 ±0.21 0.61 ±0.11 1.83 ±0.08 78.78 ±0.96 ChangeFormer-P 83.98 72.38 3.52 1.79 18.13 9.97 6.04 3.12 9.23 74.75 ChangeT 3-P 85.25 74.29 3.86 1.97 11.83 6.29 23.53 13.33 13.07 72.18 ChangeT 3-P + l.d. 85.31 74.39 2.29 1.16 8.97 4.70 30.45 17.96 13.90 71.41
+
+TABLE V COST OF ONE FORWARD PASS ON AN IMAGE PAIR AT 256 ×256, FP 32, ON ONE RTX 6000 A DA GENERATION GPU. L ATENCY IS MEAN ±STANDARD DEVIATION OVER 100 TIMED PASSES . † INNER GRADIENTS NOT COMPUTED ; THE OUTPUT IS IDENTICAL TO η=0 . T HE TRAINING COLUMNS COME FROM THE TRAINING LOGS ON SHARED GPU S; CONTENTION DIFFERED BETWEEN RUNS , SO THEY ARE INDICATIVE ONLY AND NOT COMPARABLE ACROSS ROWS .Model Params (M) GFLOPs Latency (ms) Throughput Peak mem (GB) Train Train mem 
+
+b=1 pairs/s, b=8 b=1 / b=8 it/s (GB) ChangeFormer 41.03 277.5 16.2 ±1.3 79.1 0.45 / 2.96 2.81 7.11 ChangeT 3 40.28 284.4 89.9 ±3.1 50.4 0.60 / 3.12 1.53 9.55 ChangeT 3, η=0 40.28 284.4 92.2 ±9.0 49.7 0.75 / 3.27 2.33 9.55 ChangeT 3, update skipped † – – 60.2 ±3.1 61.9 0.60 / 3.12 – –TABLE VI BATCH -1 LATENCY , PEAK ALLOCATED MEMORY , AND OPERATIONS AGAINST INPUT SIZE .ChangeFormer ChangeT 3
+
+Input ms GB GFLOPs ms GB GFLOPs 
+
+256 2 17.3 0.45 277 88.3 0.60 284 
+
+384 2 29.2 0.81 627 103.7 0.96 640 
+
+512 2 48.1 1.31 1120 123.0 1.46 1138 
+
+768 2 110.4 2.74 2556 197.2 2.89 2560 
+
+1024 2 208.6 4.75 4637 345.7 4.90 4551 
+
+update products), and similar peak memory. Their latency is not similar: at batch size 1 and 256 ×256, ChangeT 3 takes 89.9 ms against 16.2 ms, and at batch size 8 it processes 50.4 pairs per second against 79.1. Skipping the inner-gradient computation, which leaves the output equal to η=0 , shows that the update adds 49% to the batch-1 latency and 23% to the batch-8 time, with no measurable extra memory. The gap narrows with input size (Table VI), from 5.1 × at 256 ×256 to 1.7 × at 1024 ×1024, while operations and memory stay close: at small inputs the cost is dominated by the number of operations launched rather than by their arithmetic. Timings on this shared machine also drifted within a profiling run, as identical architectures measured at different points differed by up to 2.4 × in batch-1 latency and 15% in batch-8 throughput. The latencies are therefore indicative, and the parameter, operation, and memory counts are the reliable comparison. IV. C ONCLUSION 
+
+This letter specifies a vanilla adaptation of hierarchical visual TTT to bitemporal change detection using an exist-ing multiscale ChangeFormer decoder. Its defining separation is between shared learned encoder parameters, independent image-conditioned fast weights, and decoder-based temporal comparison. The architecture provides a setting for evaluating the contribution of the inherited global and local inner updates without adding temporal modules. On LEVIR-CD+, with the decoder, recipe, and budget held fixed, the ViT 3 encoder with active inner updates reaches an F1 of 80.61 ±0.90 against 78.84 ±0.21 for the ChangeFormer encoder over three seeds each, while the same encoder trained with both updates disabled reaches 78.63 ±0.20, level with ChangeFormer. The advantage stays in-domain: evaluated zero-shot on SYSU-CD, DSIFN-CD, and WHU-CD, every scratch model fails through missed changes, ChangeT 3 most of all, and pretraining helps where the inner update does not. At similar parameter and operation counts, ChangeT 3 is slower than ChangeFormer at small inputs, and the difference narrows at larger ones. These results rest on one training dataset, one baseline, and checkpoints selected on the test split; the controls are correla-tional evidence about the inner updates, not a causal account. Adapting the fast weights to the target domain at test time [15], [17], which this architecture permits but the present study does not attempt, is the natural next step. REFERENCES [1] H. Chen and Z. Shi, “A spatial-temporal attention-based method and a new dataset for remote sensing image change detection,” Remote Sensing , vol. 12, no. 10, p. 1662, 2020. [2] S2Looking dataset maintainers, “LEVIR-CD+ dataset,” Online dataset repository, accessed: September 24, 2026. [Online]. Available: https://github.com/S2Looking/Dataset [3] R. C. Daudt, B. L. Saux, and A. Boulch, “Fully convolutional Siamese networks for change detection,” in IEEE International Conference on Image Processing (ICIP) , 2018, open version: arXiv:1810.08462. [4] Y. Liu, C. Pang, Z. Zhan, X. Zhang, and X. Yang, “Building change detection for remote sensing images using a dual-task constrained deep Siamese convolutional network model,” IEEE Geoscience and Remote Sensing Letters , vol. 18, pp. 811–815, 2021. 8
+
+[5] H. Chen, Z. Qi, and Z. Shi, “Remote sensing image change detection with Transformers,” IEEE Transactions on Geoscience and Remote Sensing , 2021, online publication; open version: arXiv:2103.00208. [6] W. G. C. Bandara and V. M. Patel, “A Transformer-based Siamese network for change detection,” in IEEE International Geoscience and Remote Sensing Symposium (IGARSS) , 2022, open version: arXiv:2201.01293. [7] R. M. A. M. B. Ratnayake, W. M. B. S. K. Wijenayake, D. M. U. P. Sumanasekara, G. M. R. I. Godaliyadda, H. M. V. R. Herath, and M. P. B. Ekanayake, “Enhanced SCanNet with CBAM and dice loss for semantic change detection,” in 2025 Moratuwa Engineering Research Conference (MERCon) , 2025, pp. 84–89. [8] B. Wijenayake, A. Ratnayake, P. Sumanasekara, R. Godaliyadda, P. Ekanayake, V. Herath, and N. Wasalathilaka, “Mamba-FCS: Joint spatio-frequency feature fusion, change-guided attention, and SeK inspired loss for enhanced semantic change detection in remote sensing,” 
+
+IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , vol. 19, pp. 7680–7698, 2026. [Online]. Available: http://dx.doi.org/10.1109/JSTARS.2026.3663066 [9] T. Lei, Y. Xu, H. Ning, Z. Lv, C. Min, Y. Jin, and A. K. Nandi, “Lightweight structure-aware Transformer network for remote sensing image change detection,” IEEE Geoscience and Remote Sensing Letters ,vol. 21, pp. 1–5, 2024, article 6000305. [10] H. Chen, J. Song, C. Han, J. Xia, and N. Yokoya, “ChangeMamba: Re-mote sensing change detection with spatiotemporal state space model,” 
+
+arXiv preprint arXiv:2404.03425 , 2024. [11] W. M. B. S. K. Wijenayake, R. M. A. M. B. Ratnayake, D. M. U. P. Sumanasekara, N. S. Wasalathilaka, M. Piratheepan, G. M. R. I. Godaliyadda, M. P. B. Ekanayake, and H. M. V. R. Herath, “Precision spatio-temporal feature fusion for robust remote sensing change detection,” in 2025 IEEE 19th International Conference on Industrial and Information Systems (ICIIS) . IEEE, Jan. 2026, pp. 557–562. [Online]. Available: http://dx.doi.org/10.1109/ICIIS69028. 2026.11450773 [12] D. Perera, T. Firdous, O. Samarakoon, R. Godaliyadda, P. Ekanayake, and V. Herath, “MambaRefine-CD: MambaVision with region-boundary temporal refinement,” 2026. [Online]. Available: https: //arxiv.org/abs/2607.04403 [13] Z. Yang, G. Pei, T. Chen, X. Yuan, H. Zhang, X. Shu, and Y. Yao, “Beyond quadratic: Linear-time change detection with RWKV,” arXiv preprint arXiv:2603.19606 , 2026. [14] N. Wasalathilaka, D. Perera, O. Samarakoon, B. Wijenayake, R. Godaliyadda, V. Herath, and P. Ekanayake, “A controlled benchmark of visual state-space backbones with domain-shift and boundary analysis for remote-sensing segmentation,” 2026. [Online]. Available: https://arxiv.org/abs/2604.18721 [15] Y. Sun, X. Wang, Z. Liu, J. Miller, A. A. Efros, and M. Hardt, “Test-time training with self-supervision for generalization under distribution shifts,” 2019, ICML 2020. [Online]. Available: https: //arxiv.org/abs/1909.13231 [16] Y. Gandelsman, Y. Sun, X. Chen, and A. A. Efros, “Test-time training with masked autoencoders,” 2022. [Online]. Available: https://arxiv.org/abs/2209.07522 [17] D. Wang, E. Shelhamer, S. Liu, B. Olshausen, and T. Darrell, “Tent: Fully test-time adaptation by entropy minimization,” 2020, ICLR 2021. [Online]. Available: https://arxiv.org/abs/2006.10726 [18] J. Liang, R. He, and T. Tan, “A comprehensive survey on test-time adaptation under distribution shifts,” 2023, International Journal of Computer Vision, 2024. [Online]. Available: https: //arxiv.org/abs/2303.15361 [19] Y. Sun, X. Li, K. Dalal, J. Xu, A. Vikram, G. Zhang, Y. Dubois, X. Chen, X. Wang, S. Koyejo, T. Hashimoto, and C. Guestrin, “Learning to (learn at test time): RNNs with expressive hidden states,” arXiv preprint arXiv:2407.04620 , 2024. [20] I. Schlag, K. Irie, and J. Schmidhuber, “Linear transformers are secretly fast weight programmers,” 2021. [Online]. Available: https://arxiv.org/abs/2102.11174 [21] T. Zhang, S. Bi, Y. Hong, K. Zhang, F. Luan, S. Yang, K. Sunkavalli, W. T. Freeman, and H. Tan, “Test-time training done right,” 2025. [Online]. Available: https://arxiv.org/abs/2505.23884 [22] A. Behrouz, P. Zhong, and V. Mirrokni, “Titans: Learning to memorize at test time,” 2024. [Online]. Available: https://arxiv.org/abs/2501.00663 [23] Z. Yang, G. Pei, Y. Yao, T. Zhou, L. Ding, and F. Shen, “Towards remote sensing change detection with neural memory,” arXiv preprint arXiv:2602.10491 , 2026. [24] D. Han, Y. Li, T. Li, Z. Cao, Z. Wang, J. Song, Y. Cheng, B. Zheng, and G. Huang, “ViT 3: Unlocking test-time training in vision,” arXiv preprint arXiv:2512.01643 , 2025, version 2, April 2026.

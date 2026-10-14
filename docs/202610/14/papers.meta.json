@@ -1,0 +1,39 @@
+{
+  "label": "2026-10-14",
+  "date": "2026-10-14",
+  "generated_at": "2026-10-14T22:17:40",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202610/14/2610.15813v1-changet3-evaluating-vision-test-time-training-for-remote-sensing-change-detection",
+      "section": "quick",
+      "title_en": "ChangeT$^3$: Evaluating Vision Test-Time Training for Remote Sensing Change Detection",
+      "authors": "Sharukshan Niranjan, Oshadha Samarakoon, Nichula Wasalathilaka, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath",
+      "date": "2026-10-11",
+      "pdf": "https://arxiv.org/pdf/2610.15813v1",
+      "score": "7.0",
+      "evidence": "保留空间细节的双时相遥感变化检测",
+      "tldr": "双时相遥感变化检测需要兼顾空间细节与上下文信息。本文提出 ChangeT³，将层次化 ViT³-Tiny 编码器与多尺度 ChangeFormer 解码器组成朴素孪生结构，两条图像流共享编码器参数但独立计算快速权重。在 LEVIR-CD+ 上从零训练，F1 达 80.61±0.90，优于 ChangeFormer 的 78.84±0.21；关闭内层更新后仅 78.63±0.20。该设置说明图像条件化的测试时训练能有效提升变化检测性能。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Bitemporal remote sensing change detection requires representations that preserve spatial detail while capturing contextual information relevant to changes between acquisitions. Visual test-time training offers an alternative to explicit token-to-token attention by adapting a compact inner model to each image. This letter describes ChangeT$^3$, a vanilla Siamese configuration combining the existing hierarchical ViT$^3$-Tiny encoder with the multiscale ChangeFormer decoder. The two image streams share learned encoder parameters, while their fast weights are computed independently from their respective spatial features. Each encoder block retains the inherited global simplified SwiGLU and local adaptive depthwise-convolution branches. Temporal comparison is performed by the decoder through learned fusion of paired features at four resolutions, followed by coarse-to-fine aggregation and binary prediction. This separation provides a direct setting for examining image-conditioned inner updates without introducing an additional temporal interaction module. Trained from scratch on LEVIR-CD+ with the same decoder, recipe, and budget as a ChangeFormer control, ChangeT$^3$ reaches an F1 of 80.61$\\pm$0.90 against 78.84$\\pm$0.21 for ChangeFormer (three seeds each); as in the standard protocol for this dataset, checkpoints are selected on the test split. Trained with both inner updates disabled, the same encoder reaches 78.63$\\pm$0.20. Neither model transfers zero-shot to SYSU-CD, DSIFN-CD, or WHU-CD, and ChangeT$^3$ is the slower of the two at small inputs despite similar parameter and operation counts.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202610/14/2610.18624v1-majortomelliot-pretrain-a-multi-sensor-multi-temporal-pretraining-dataset-for-earth-observation",
+      "section": "quick",
+      "title_en": "MajorTOM:Elliot Pretrain, A Multi-Sensor, Multi-Temporal Pretraining Dataset for Earth Observation",
+      "authors": "Carmen Oliver Huidobro, Mikolaj Czerkawski, Kevin Monsalvez-Pozo, Cesar Aybar, Gustau Camps-Valls, Oscar J. Pellicer-Valero",
+      "date": "2026-10-13",
+      "pdf": "https://arxiv.org/pdf/2610.18624v1",
+      "score": "6.0",
+      "evidence": "多传感器对地观测数据集，含ESA WorldCover土地覆盖产品",
+      "tldr": "Elliot Pretrain 利用 AlphaEarth 嵌入聚类，从 Major-TOM 网格构建 279,166 个 10 km 瓦片，统一堆叠 Sentinel-2、Landsat、Sentinel-1、DEM 与 WorldCover，并划分为单时相、月度和爆发三种时相。数据以 6.3 TB COG 和 TACO v3 Parquet 元数据发布，配套库可在加载时生成说明、标题及 16 类视觉语言任务。OlmoEarth-Base 短预训练验证：25% 子集在 8/9 基准匹配或超过全量，Landsat、DEM/WorldCover 预测目标和 Sentinel-1 多在多数基准带来提升。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Pretraining generalist Earth observation foundation models requires data that combine several sensors, varied temporal sampling and, increasingly, text, yet open datasets rarely provide all three in one consistent, easily accessible form. We introduce MajorTOM:Elliot Pretrain, a collection of 279,166 tiles of 10 km drawn from the Major-TOM grid by clustering AlphaEarth embeddings. Each tile stacks Sentinel-2 L1C, Landsat-8/9, Sentinel-1 RTC, Copernicus DEM and ESA WorldCover on a shared 1056x1056-pixel, 10 m grid, complemented by cloud masks, OpenStreetMap entities and ERA5 weather. The tiles are partitioned into three temporal regimes, Monotemporal (250,000 tiles, one acquisition), Monthly (12,500 tiles, twelve acquisitions spread over the annual cycle) and Burst (16,666 tiles, six acquisitions within 30 days), and are released as 6.3 TB of Cloud Optimized GeoTIFFs indexed by TACO v3 Parquet metadata, a standard that allows cloud streaming, efficient data access, and filtering before any pixel is read. A companion library derives sensor-tagged fact sheets, captions and 16 families of vision-language tasks from these layers at load time. We test our design choices in short pretraining runs of OlmoEarth-Base. First, a 25% subset of Major-TOM Core-S2L2A curated with AlphaEarth embeddings matches or exceeds the full corpus on 8 of 9 benchmarks. Second, on Elliot-Pretrain, adding Landsat-8/9 improves or matches Sentinel-2 only pretraining on every benchmark. Third, using DEM and WorldCover as prediction targets during pretraining further improves 8 of 9 benchmarks, while giving the same maps to the encoder as inputs degrades 5 of 9. Fourth, Sentinel-1 helps on 7 of 9 benchmarks, particularly on benchmarks with radar inputs. Fifth, rule-based captions match a small language model at no cost. The dataset is openly available at https://source.coop/major-tom/elliot-pretrain.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
