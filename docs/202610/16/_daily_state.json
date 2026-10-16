@@ -1,0 +1,25 @@
+{
+  "date": "20261016",
+  "date_label": "",
+  "generated_at": "2026-10-16 22:09:37 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.13406v1",
+      "route": "202610/16/2610.13406v1-desertification-forecasting-in-semi-arid-regions-using-deep-learning-to-probe-the-observability-limits-of-land-degradation-dynamics",
+      "title": "Desertification Forecasting in Semi-Arid Regions: Using Deep Learning to Probe the Observability Limits of Land Degradation Dynamics",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "基于地球观测的土地退化变化检测与预测",
+      "first_seen_at": "2026-10-16 22:09:37 UTC",
+      "updated_at": "2026-10-16 22:09:37 UTC"
+    }
+  ]
+}

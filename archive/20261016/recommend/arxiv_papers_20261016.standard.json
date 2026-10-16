@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-16T22:09:04.763888+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.13406v1",
+      "source": "arxiv",
+      "title": "Desertification Forecasting in Semi-Arid Regions: Using Deep Learning to Probe the Observability Limits of Land Degradation Dynamics",
+      "abstract": "Forecasting desertification has received far less attention than mapping it. We use a convolutional LSTM (ConvLSTM) trained on ten annual Earth Observation (EO) variables (2000-2023) over the semi-arid state of Ceará, Brazil, on a 256x206 grid at roughly 2.2 km resolution, to measure how much of the year-to-year evolution of a MapBiomas-derived degradation index (IDV) can be predicted from satellite data. The network predicts a bounded change on top of the last observed state, is trained in two stages (single-step, then recursive rollout) and is evaluated on a contiguous spatial and temporal holdout. State-wide mean IDV rose from 0.238 to 0.350 between 2000 and 2023, about 0.005 per year, but cell-level change is dominated by year-to-year jumps, and a gradient-boosting model given all channels explains only 4.7% of its variance. Against this ceiling, the ConvLSTM lowers RMSE relative to persistence by 1.6% one year ahead and 4.4% four years ahead in a held-out southern band (p < 0.001), beats persistence with a constant drift and reproduces 53-69% of the regional drift. Drift-aware baselines only help from the third year onward, by up to 4.4% in RMSE at six years. An earlier formulation that redrew the whole field each year predicted changes unrelated to the observed ones (correlation -0.06) and produced a spurious decline when run recursively. Channel knockouts suggest that elevation and EVI degrade the forecast, while slope and aspect have no measurable effect. Monte Carlo dropout and stochastic scenario maps convey the uncertainty that the expected-value forecast hides. Under climatological forcing, mean IDV rises from 0.350 in 2023 to 0.370 in 2030. EO-based desertification forecasting is therefore reliable for the regional trend, not for individual cells.",
+      "authors": [
+        "Filipe Moura Da Silva",
+        "Cláubio Landney Lima Bandeira"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.LG"
+      ],
+      "published": "2026-10-09T11:20:07+00:00",
+      "link": "https://arxiv.org/pdf/2610.13406v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "land degradation change detection and forecasting from Earth observation",
+      "llm_evidence_cn": "基于地球观测的土地退化变化检测与预测",
+      "llm_evidence": "基于地球观测的土地退化变化检测与预测",
+      "canonical_evidence": "基于地球观测的土地退化变化检测与预测",
+      "llm_tldr_en": "Desertification research focuses on mapping rather than forecasting. Using a ConvLSTM trained on ten annual Earth observation variables over semi-arid Ceará, the authors measure how much year-to-year land degradation evolution is predictable, probing observability limits.",
+      "llm_tldr_cn": "本文针对荒漠化研究偏重制图、对其年际演变可预测性关注不足的问题展开研究。作者在半干旱的巴西塞阿拉州，用卷积 LSTM 基于十年地球观测变量预测 MapBiomas 退化指数的年际变化。模型以在上一观测状态上预测有界变化的方式训练，并在连续时空留出集上评估。结果表明卫星数据能预测部分退化演变，同时揭示了退化动态的可观测性边界，为土地退化监测与预测提供了基准。",
+      "llm_tldr": "本文针对荒漠化研究偏重制图、对其年际演变可预测性关注不足的问题展开研究。作者在半干旱的巴西塞阿拉州，用卷积 LSTM 基于十年地球观测变量预测 MapBiomas 退化指数的年际变化。模型以在上一观测状态上预测有界变化的方式训练，并在连续时空留出集上评估。结果表明卫星数据能预测部分退化演变，同时揭示了退化动态的可观测性边界，为土地退化监测与预测提供了基准。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
