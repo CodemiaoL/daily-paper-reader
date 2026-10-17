@@ -1,0 +1,56 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-17T21:08:14.427950+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.21238v1",
+      "source": "arxiv",
+      "title": "A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation",
+      "abstract": "A few well-annotated datasets for land-cover semantic segmentation have recently been introduced to advance the field of earth observation technologies. However, these datasets overlook the significant diversity among geographic areas with different climates, which can greatly impact and diversify land cover. Consequently, this leads to a domain gap in remote sensing images and severe performance degradation of the segmentation models. To enhance land-cover semantic segmentation with improved generalization ability, we conducted the first investigation into the impact of climate on this task. In this paper, we present a unique large-scale Climate-Aware Satellite Images Dataset (CASID) specifically designed for domain adaptive land-cover semantic segmentation. It consists of 980 satellite images with a size of 5000 x 5000 pixels, collected from 30 different regions around Asia, covering over 24,500 square kilometers. These images are gathered from four distinct climate zones, namely temperate monsoon, subtropical monsoon, tropical monsoon, and tropical rainforest. It includes four sub-datasets/domains, each representing one of the aforementioned climate zones. This characteristic makes CASID the first climate-aware land-cover semantic segmentation dataset with multiple domains. Additionally, we provide a comprehensive analysis of the samples from the four climate zones, emphasizing differences in global image features, image texture, category distribution, spectral value, and object shape. These analyses offer valuable insights for subsequent research in this field. Moreover, we conduct extensive experiments to evaluate the latest semantic segmentation and unsupervised domain adaptation methods on the CASID dataset. These results serve as a robust baseline for future research endeavors. Our dataset will be made publicly available at https://github.com/Linwei-Chen/CASID.",
+      "authors": [
+        "Songlin Liu",
+        "Linwei Chen",
+        "Li Zhang",
+        "Jun Hu",
+        "Ying Fu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-10-15T04:36:57+00:00",
+      "link": "https://arxiv.org/pdf/2610.21238v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "land-cover semantic segmentation dataset for remote sensing",
+      "llm_evidence_cn": "面向遥感的土地覆盖语义分割数据集",
+      "llm_evidence": "面向遥感的土地覆盖语义分割数据集",
+      "canonical_evidence": "面向遥感的土地覆盖语义分割数据集",
+      "llm_tldr_en": "Presents CASID, a large-scale climate-aware satellite image dataset for land-cover semantic segmentation, addressing climate-induced domain gaps and improving model generalization across regions.",
+      "llm_tldr_cn": "针对现有土地覆盖语义分割数据集忽视不同气候区地理多样性、导致遥感影像域差异与模型性能下降的问题，本文首次系统研究气候对土地覆盖分割的影响，构建了大规模气候感知卫星影像数据集CASID，专门用于域自适应分割。实验表明气候差异会造成显著域间性能退化，该数据集能有效支撑跨气候域泛化能力评估与提升，为土地覆盖制图与变化分析提供重要数据基础。",
+      "llm_tldr": "针对现有土地覆盖语义分割数据集忽视不同气候区地理多样性、导致遥感影像域差异与模型性能下降的问题，本文首次系统研究气候对土地覆盖分割的影响，构建了大规模气候感知卫星影像数据集CASID，专门用于域自适应分割。实验表明气候差异会造成显著域间性能退化，该数据集能有效支撑跨气候域泛化能力评估与提升，为土地覆盖制图与变化分析提供重要数据基础。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

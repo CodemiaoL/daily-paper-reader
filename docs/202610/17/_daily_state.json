@@ -1,0 +1,25 @@
+{
+  "date": "20261017",
+  "date_label": "",
+  "generated_at": "2026-10-17 21:09:01 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.21238v1",
+      "route": "202610/17/2610.21238v1-a-large-scale-climate-aware-satellite-image-dataset-for-domain-adaptive-land-cover-semantic-segmentation",
+      "title": "A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向遥感的土地覆盖语义分割数据集",
+      "first_seen_at": "2026-10-17 21:09:01 UTC",
+      "updated_at": "2026-10-17 21:09:01 UTC"
+    }
+  ]
+}

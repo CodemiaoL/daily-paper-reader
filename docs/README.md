@@ -48,7 +48,7 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-10-16</span>
+      <span class="dpr-home-dashboard-kicker">2026-10-17</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
     <strong class="dpr-home-dashboard-count">共 1 篇</strong>
@@ -58,7 +58,7 @@
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-16 22:09:37 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-17 21:09:01 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,9 +69,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>2026-10-16 日报：今天速读1篇、精读0篇，唯一亮点是6.0分的半干旱区荒漠化预测深度学习论文。</p>
-<p>最值得看的是它如何用深度学习探测土地退化动态的可观测性边界，即预测能力在数据与区域限制下能走多远。</p>
-<p>普通读者可先关注其方法思路和局限，若关心实际防治，再结合本地数据判断是否值得深读原文。</p>
+<p>今日仅速读 1 篇，聚焦气候感知卫星图像数据集与域自适应土地覆盖语义分割。</p>
+<p>最值得看的是“气候感知数据构建”和“跨域语义分割评估”这一方向，论文当前评分 6.0/10。</p>
+<p>普通读者可先速读摘要与数据集设计部分，判断是否契合你的土地覆盖跨域应用需求。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -96,7 +96,7 @@
     <strong class="dpr-home-dashboard-count">1 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Desertification Forecasting in Semi-Arid Regions: Using Deep Learning to Probe the Observability Limits of Land Degradation Dynamics">Desertification Forecasting in Semi-Arid Regions: Using Deep Learning to Probe the Observability Limits of Land Degradation Dynamics</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation">A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation</span></li></ul>
   </div>
   <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">transit-lucc <strong>1</strong></span></div>
 </section>
