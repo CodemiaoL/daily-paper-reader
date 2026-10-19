@@ -1,0 +1,25 @@
+{
+  "date": "20261019",
+  "date_label": "",
+  "generated_at": "2026-10-19 22:57:08 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.22415v1",
+      "route": "202610/19/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india",
+      "title": "Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "用深度学习遥感制图刻画人工林的土地覆被与土地利用变化",
+      "first_seen_at": "2026-10-19 22:57:08 UTC",
+      "updated_at": "2026-10-19 22:57:08 UTC"
+    }
+  ]
+}

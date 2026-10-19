@@ -1,0 +1,56 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-19T22:56:54.979690+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.22415v1",
+      "source": "arxiv",
+      "title": "Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India",
+      "abstract": "Small-area forest plantations play a vital role in the socioeconomic well-being of farmers in Southeast Asia. Most plantations are established on former agricultural land, often on land less suitable for agriculture. Plantations that are converted from natural forest have adverse impacts on biodiversity. Mapping small-area plantations is thus important to understand the dynamics of forest cover in Southeast Asia and to study the social, economic, and ecological effects of this important land cover and land use change. While the small size of forest plantations makes it difficult to detect them using moderate resolution satellite sensors, the problem is exacerbated by the high degree of mixing between plantations, surrounding vegetation, and other land covers, which often show variegated responses in satellite signals across space and time. In this paper, we study the problem of mapping small-area forest plantations in East and West Godavari districts of Andhra Pradesh, India using deep learning methods. Remotely sensed cloud-free data from the Harmonized Landsat Sentinel-2 S10 product were classified using a pixel-level neural network and training data labeled using a field-based survey in concert with expert aerial photo interpretation. We compare the performance of deep learning methods with a baseline random forest classifier in our study region of 21543 sq. km over a period of 3 years and analyze the differences in the results across land cover classes and seasons.",
+      "authors": [
+        "Snehal More",
+        "Anuj Karpatne",
+        "Valerie A. Thomas",
+        "Randolph H. Wynne"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.LG"
+      ],
+      "published": "2026-10-14T23:36:17+00:00",
+      "link": "https://arxiv.org/pdf/2610.22415v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "land cover and land use change mapping of forest plantations with deep learning remote sensing",
+      "llm_evidence_cn": "用深度学习遥感制图刻画人工林的土地覆被与土地利用变化",
+      "llm_evidence": "用深度学习遥感制图刻画人工林的土地覆被与土地利用变化",
+      "canonical_evidence": "用深度学习遥感制图刻画人工林的土地覆被与土地利用变化",
+      "llm_tldr_en": "Deep learning maps small forest plantations in Godavari districts to support analysis of land cover and land use change where plantations mix with surrounding vegetation.",
+      "llm_tldr_cn": "东南亚小面积人工林多在原农地上建立，与周边植被高度混叠，中分辨率卫星难以识别，导致林地覆盖与土地利用变化难以准确刻画。本文面向印度安得拉邦戈达瓦里地区，构建深度学习遥感制图方法以提取小面积人工林。实验表明该方法能在复杂混叠背景下有效识别细小人工林斑块，为评估人工林扩张引发的土地覆被与土地利用变化及其生态社会经济影响提供数据基础。",
+      "llm_tldr": "东南亚小面积人工林多在原农地上建立，与周边植被高度混叠，中分辨率卫星难以识别，导致林地覆盖与土地利用变化难以准确刻画。本文面向印度安得拉邦戈达瓦里地区，构建深度学习遥感制图方法以提取小面积人工林。实验表明该方法能在复杂混叠背景下有效识别细小人工林斑块，为评估人工林扩张引发的土地覆被与土地利用变化及其生态社会经济影响提供数据基础。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

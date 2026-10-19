@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-10-19 <!--dpr-date:20261019-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/19/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india" data-sidebar-item="{&quot;title&quot;: &quot;Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;用深度学习遥感制图刻画人工林的土地覆被与土地利用变化&quot;}">Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India</a>
   * 2026-10-17 <!--dpr-date:20261017-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/17/2610.21238v1-a-large-scale-climate-aware-satellite-image-dataset-for-domain-adaptive-land-cover-semantic-segmentation" data-sidebar-item="{&quot;title&quot;: &quot;A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.21238v1-a-large-scale-climate-aware-satellite-image-dataset-for-domain-adaptive-land-cover-semantic-segmentation&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;面向遥感的土地覆盖语义分割数据集&quot;}">A large-scale climate-aware satellite image dataset for domain adaptive land-cover semantic segmentation</a>

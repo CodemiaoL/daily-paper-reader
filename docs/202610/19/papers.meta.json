@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-19",
+  "date": "2026-10-19",
+  "generated_at": "2026-10-19T22:57:10",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202610/19/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india",
+      "section": "quick",
+      "title_en": "Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India",
+      "authors": "Snehal More, Anuj Karpatne, Valerie A. Thomas, Randolph H. Wynne",
+      "date": "2026-10-14",
+      "pdf": "https://arxiv.org/pdf/2610.22415v1",
+      "score": "6.0",
+      "evidence": "用深度学习遥感制图刻画人工林的土地覆被与土地利用变化",
+      "tldr": "东南亚小面积人工林难被中分辨率卫星识别，且与周边植被混叠。研究以印度安得拉邦东、西戈达瓦里地区为例，利用HLS S10无云影像和像素级神经网络，结合实地调查与专家航片解译标签进行制图。在21543平方公里、3年数据上与随机森林基线比较，并分析不同地类和季节的差异。该工作为小面积人工林动态监测及社会生态效应研究提供方法参考。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Small-area forest plantations play a vital role in the socioeconomic well-being of farmers in Southeast Asia. Most plantations are established on former agricultural land, often on land less suitable for agriculture. Plantations that are converted from natural forest have adverse impacts on biodiversity. Mapping small-area plantations is thus important to understand the dynamics of forest cover in Southeast Asia and to study the social, economic, and ecological effects of this important land cover and land use change. While the small size of forest plantations makes it difficult to detect them using moderate resolution satellite sensors, the problem is exacerbated by the high degree of mixing between plantations, surrounding vegetation, and other land covers, which often show variegated responses in satellite signals across space and time. In this paper, we study the problem of mapping small-area forest plantations in East and West Godavari districts of Andhra Pradesh, India using deep learning methods. Remotely sensed cloud-free data from the Harmonized Landsat Sentinel-2 S10 product were classified using a pixel-level neural network and training data labeled using a field-based survey in concert with expert aerial photo interpretation. We compare the performance of deep learning methods with a baseline random forest classifier in our study region of 21543 sq. km over a period of 3 years and analyze the differences in the results across land cover classes and seasons.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
