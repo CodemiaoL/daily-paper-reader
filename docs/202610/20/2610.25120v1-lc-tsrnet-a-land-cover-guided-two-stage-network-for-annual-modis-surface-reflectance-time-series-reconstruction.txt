@@ -1,0 +1,1919 @@
+1
+LC-TSRNet: A Land-Cover-Guided Two-Stage
+Network for Annual MODIS Surface Reflectance
+Time Series Reconstruction
+Wenjuan Zhang , Member, IEEE, Xuesong Ma , Zhen Li , Meixiang Wang , Caimeng Yi , Jie Pan ,
+Nan Su , Member, IEEE, and Bing Zhang , Fellow, IEEE
+Abstract—Moderate Resolution Imaging Spectroradiometer
+(MODIS) surface reflectance (SR) products often suffer from data
+gaps due to cloud contamination and sensor malfunctions, limiting
+their applications in long-term and large-scale studies. Most
+existing methods rely on cloud-free observations from optical time
+series or introduce synthetic aperture radar (SAR) time series as
+auxiliary information. However, due to the coarse spatial resolution
+of MODIS, cloud-free reference images are difficult to obtain,
+and SAR imagery is not well matched to the spatial resolution of
+MODIS, making it difficult to provide effective prior constraints.
+To address these issues, this study proposes a land-cover-guided
+two-stage time series reconstruction network (LC-TSRNet) for
+seamless reconstruction of annual MODIS SR products. In the first
+stage, an annual land cover map is introduced as prior knowledge,
+and a class-specific spectral prior module (CSPM) is designed
+by leveraging the spectral similarity within identical land cover
+types, thereby providing prior spectral constraints for missing
+regions. In the second stage, to address large-area, persistent,
+and overlapping gaps in MODIS imagery, a spatiotemporal multi-
+scale residual module (SMRM) is designed to adaptively exploit
+and integrate multi-scale spatiotemporal contextual information.
+Meanwhile, to address the limited collaborative utilization of
+spatio-temporal-spectral information, a three-dimensional atten-
+tion module (3DAM) is designed to impose cross-dimensional joint
+constraints. Considering the lack of publicly available MODIS
+sample datasets, this study constructs the AIRMOD-TSR dataset,
+which contains annual MODIS SR time series and corresponding
+annual land cover maps. Extensive experimental results show
+that LC-TSRNet outperforms the comparison methods and
+This work was supported by the Science and Disruptive Technology
+Program, AIRCAS under Grant 2024-AIRCAS-SDTP-11. (Corresponding
+author: Jie Pan.)
+Wenjuan Zhang, Jie Pan are with the State Key Laboratory of Remote
+Sensing and Digital Earth, Aerospace Information Research Institute, Chinese
+Academy of Sciences, Beijing 100101, China (e-mail: zhangwj@aircas.ac.cn;
+panjie@aircas.ac.cn).
+Xuesong Ma, Caimeng Yi are with the Aerospace Information Research
+Institute, Chinese Academy of Sciences, Beijing 100094, China, and also with
+the College of Resources and Environment, University of Chinese Academy
+of Sciences, Beijing 100049, China (e-mail: maxuesong24@mails.ucas.ac.cn;
+yicaimeng25@mails.ucas.ac.cn).
+Zhen Li is with the Aerospace Information Research Institute, Chinese
+Academy of Sciences, Beijing 100094, China (e-mail: lizhen02@aircas.ac.cn).
+Meixiang Wang is with the School of Artificial Intelligence, Xidian
+University, Xi’an 710071, China (e-mail: 25171111438@stu.xidian.edu.cn).
+Nan Su is with the College of Information and Communication Engineering,
+Harbin Engineering University, Harbin 150001, China, and also with the Key
+Laboratory of Advanced Marine Communication and Information Technol-
+ogy, Ministry of Industry and Information Technology, Harbin Engineering
+University, Harbin 150001, China (e-mail: sunan08@hrbeu.edu.cn).
+Bing Zhang is with the State Key Laboratory of Remote Sensing and
+Digital Earth, Aerospace Information Research Institute, Chinese Academy of
+Sciences, Beijing 100101, China, and also with the College of Resources and
+Environment, University of Chinese Academy of Sciences, Beijing 100049,
+China (e-mail: zb@radi.ac.cn).
+achieves better reconstruction accuracy and spectral fidelity.
+Under the spatially adjacent scenario, LC-TSRNet improves
+PSNR by 0.56 dB and reduces SAM by 0.13◦. The vegetation
+monitoring application further verifies the practical value of
+the reconstructed SR time series. The dataset and code will be
+released at https://github.com/WenjuanZhang-aircas/LC-TSRNet.
+Index Terms—Time series reconstruction, MODIS surface
+reflectance, land cover, gap filling, deep learning.
+I. Introduction
+O
+PTICAL satellite remote sensing has emerged as a fun-
+damental instrument for Earth observation. The periodic
+revisit of satellites enables the acquisition of time series imagery
+over the same region, supporting continuous monitoring and
+quantitative analysis of the Earth’s surface [1]. Time series
+optical remote sensing data have been widely applied in
+vegetation monitoring [2], [3], phenology extraction [4], [5],
+land-use change analysis [6], [7] and disaster response [8],
+[9]. Among various optical sensors, MODIS has become an
+important data source for long-term, large-scale time series
+studies because of its high temporal resolution, wide swath, and
+long-term continuous observations capabilities [10]. Among
+MODIS land products, the Surface Reflectance (SR) product
+serves as the most fundamental standardized data, providing
+critical inputs for higher-level products such as the Leaf Area
+Index (LAI), Fraction of Absorbed Photosynthetically Active
+Radiation (FPAR), and Net Primary Productivity (NPP).
+However, MODIS SR imagery commonly suffers from
+varying degrees of data gaps due to cloud contamination and
+sensor malfunctions [11]. Long-term continuous observations
+indicate that the average global cloud coverage for MODIS data
+reaches approximately 67% [12]. This not only compromises
+the overall quality but also disrupts the temporal continuity of
+observations, thereby limiting the accuracy and reliability of
+applications. In addition, SR exhibits pronounced intra-annual
+dynamics driven by vegetation phenology and seasonal changes
+[13]. Therefore, a time series reconstruction algorithm tailored
+to MODIS SR products is required to generate seamless annual
+SR time series while preserving intra-annual land surface
+dynamics.
+To improve the data quality of optical remote sensing
+imagery, extensive research over the past decades has led to a
+variety of missing reconstruction methods. Early approaches
+can be categorized into spatial-based, temporal-based, and
+spatiotemporal hybrid methods [11]. However, most of these
+arXiv:2610.25120v1  [cs.CV]  18 Oct 2026
+
+
+2
+Fig. 1: Cumulative frequency distributions of annual missing ratios in global MOD09A1 data during 2019–2023. (a) Regional
+annual mean missing ratio for 512 × 512-pixel regions. (b) Pixel-level annual missing ratio.
+methods rely on linear assumptions [14]. Consequently, they
+exhibit deficiencies in complex and fine-textured scenes, and
+are highly susceptible to the quality of auxiliary images.
+In recent years, deep learning technology has been regarded
+as a new paradigm for missing reconstruction in remote sensing
+imagery. According to input configurations, deep-learning-
+based approaches can be categorized into single-image-based
+and sequence-based methods. Single-image-based methods
+typically reconstruct missing images by incorporating a nearby
+cloud-free optical image or a synthetic aperture radar (SAR)
+image as prior information [15], [16], [17], [18]. However,
+extending these methods to time series is challenging, as each
+missing image requires corresponding auxiliary data, and the
+correlations between sequential images are largely ignored.
+Sequence-based methods typically take multi-temporal image
+sequences as input to fully exploit inter-image temporal
+dynamics and spatial correlations, thereby substantially im-
+proving reconstruction quality. Some studies use only cloud-
+contaminated optical sequences with missing observations,
+exploiting the cloud-free images to reconstruct the missing
+content [19], [20], [14]. Recently, TAMGAN [21] uses a
+GAN framework with a temporal attention mechanism to
+reconstruct annual MODIS SR time series. Nevertheless, its
+global spectral noise filling strategy may struggle to handle
+completely missing observations, and its applicability to full
+7-band MODIS SR products remains to be verified because
+only four bands are reconstructed. In addition, some studies
+address missing observations in optical time series imagery by
+integrating SAR data [22], [23], [24].
+Although sequence-based deep learning methods have made
+substantial progress, MODIS SR time series reconstruction
+still faces the following challenges. First, most sequence-based
+methods rely on cloud-free observations from optical time
+series or introduce SAR time series as auxiliary data, and they
+have been developed and validated primarily on Sentinel and
+Landsat imagery [14], [25]. However, due to the coarse spatial
+resolution of MODIS, such as 500 m for the MOD09A1 SR
+product, it is difficult to obtain cloud-free reference images
+for reconstruction at the regional scale [26]. In this study, the
+global land surface was divided into 6854 regions of 512 ×
+512 pixels (approximately 65536 km2), and the annual mean
+missing ratio of each region was derived from MOD09A1
+data for 2019–2023. As shown in Fig. 1(a), the resulting
+cumulative frequency distribution indicates that entirely cloud-
+free time series are absent at the regional scale, while regions
+with annual mean missing ratios below 10% account for only
+4.66% of all global land regions. In addition, SAR imagery is
+generally acquired at spatial resolutions ranging from meters
+to tens of meters [27], which are not naturally compatible with
+MODIS SR products. When SAR imagery is aggregated to the
+spatial resolution of MODIS, its fine-scale textural features and
+geometric structural details are substantially weakened [28],
+making it difficult to provide effective auxiliary information.
+Therefore, it is necessary to explore new prior constraints for
+MODIS SR time series reconstruction.
+Second, current reconstruction methods typically employ
+fixed local receptive fields or static multi-scale structures for
+feature extraction, but lack an effective mechanism to adaptively
+exploit multi-scale spatiotemporal contextual information in
+response to varying extents of missing data [29], [30]. MODIS
+SR time series imagery often suffers from large-area gaps across
+multiple consecutive periods, under which valid information
+within local neighborhoods becomes severely insufficient
+[31]. As a result, these methods struggle to establish long-
+range spatiotemporal dependencies across missing regions,
+making reconstruction particularly challenging under large-area,
+persistent, and overlapping scenarios.
+Third, existing methods still lack effective integration of
+spatial, temporal, and spectral information, thereby neglecting
+the intrinsic physical correlations among them [32], [33].
+MODIS SR time series imagery contains highly coupled
+spatial, temporal, and spectral information. Due to the lack of
+joint cross-dimensional constraint, these methods struggle to
+simultaneously preserve spatiotemporal continuity and spectral
+fidelity during reconstruction.
+Moreover, deep-learning-based reconstruction methods rely
+on extensive training samples. Existing publicly available
+satellite time series datasets for missing reconstruction are
+mainly developed for Sentinel and Landsat imagery, such as
+EarthNet2021 [34], SEN12MS-CR-TS [35], PASTIS-R [36],
+and AllClear [37]. In contrast, MODIS SR time series sample
+datasets remain scarce.
+
+
+3
+To address the above issues, this study proposes a novel
+Land-Cover-guided two-stage Time Series Reconstruction
+Network (LC-TSRNet), which simultaneously reconstructs
+missing values across annual MOD09A1 8-day composite
+SR time series. The proposed LC-TSRNet adopts a coarse-
+to-fine two-stage architecture. In the first stage, the globally
+available MCD12Q1 IGBP annual land cover map is introduced
+as prior knowledge, and a class-specific spectral prior module
+(CSPM) is designed to impose spectral constraints, thereby
+generating a coarse representation. In the second stage, a
+spatiotemporal multi-scale residual module (SMRM) and a
+three-dimensional attention module (3DAM) are designed to
+refine spatio-temporal-spectral features. Finally, seamless SR
+time series with rich texture details are generated.
+The main contributions of this study are as follows:
+1) To impose prior constraints on MODIS SR time series
+reconstruction, we incorporate land cover information and
+design the CSPM. By leveraging the spectral similarity within
+identical land cover types at each time step, the CSPM
+transforms the semantic class knowledge into spectral prior
+knowledge, thereby imposing spectral-radiometric constraints
+on missing regions and improving the spectral fidelity of the
+reconstructed SR time series.
+2) The SMRM is designed to adaptively exploit multi-scale
+spatiotemporal contextual information under varying extents of
+missing data. By employing parallel 3D convolutional branches
+with different dilation rates and a progressive aggregation
+mechanism, the SMRM enables cross-scale spatiotemporal
+interaction across missing regions, thereby providing effective
+joint spatiotemporal constraints for reconstructing large-area,
+persistent, and overlapping gaps.
+3) The 3DAM is designed to adaptively enhance key features
+across the temporal, spatial, and spectral dimensions. By
+integrating three attention submodules in a parallel-cascaded
+structure, the 3DAM establishes joint cross-dimensional con-
+straints and strengthens the intrinsic correlations among spatio-
+temporal-spectral features, thereby improving the spatiotempo-
+ral continuity and spectral fidelity of reconstructed SR time
+series.
+4) To address the scarcity of publicly available MODIS SR
+time series datasets, the AIRMOD-TSR dataset is constructed.
+The dataset comprises annual MODIS SR time series and
+corresponding annual land cover maps for 13 representative
+regions of interest (ROIs) worldwide, providing a benchmark
+for MODIS SR time series reconstruction.
+The rest of this article is organized as follows. Section II
+reviews related studies on missing reconstruction. Section III
+introduces the construction procedure of AIRMOD-TSR dataset.
+Section IV describes the proposed LC-TSRNet model and its
+key components in detail. Section V presents the comparison
+results under different simulated scenarios and the ablation
+study. Section VI discusses the reconstruction performance in
+real-world scenarios, limitations, and future directions. Finally,
+Section VII concludes this article.
+II. Related Works
+A. Early Approaches
+Early research in missing reconstruction can generally be
+classified into three categories: spatial-based, temporal-based,
+and spatiotemporal hybrid methods.
+1) Spatial-Based Methods: Spatial-based methods depend
+entirely upon the valid pixels within incomplete image, recon-
+structing gaps by exploiting image statistical characteristics
+and spatial correlations. Spatial interpolation assumes local
+continuity, inferring missing pixels by assigning weights to
+neighboring pixels [38]. Typical methods include Kriging
+interpolation [39], nearest-neighbor interpolation [40], and
+spline interpolation [41]. Additionally, variation-based [42],
+[43], exemplar-based [44], [45], and partial differential equation
+(PDE)-based methods [46] have also been applied to missing
+reconstruction. However, these methods are typically suitable
+only for small-area gaps or homogeneous regions. They
+exhibit significant limitations in accuracy and reliability when
+reconstructing large-area gaps or complex-texture regions.
+2) Temporal-Based Methods: Temporal-based methods typi-
+cally require auxiliary images from other dates and reconstruct
+gaps by exploiting temporal correlations across multi-temporal
+observations. Representative methods include temporal filtering
+[47], histogram matching [48], and regression-based methods
+[49], [50]. For instance, Zeng et al. [49] proposed WLR, which
+combines sequential reference observations with a reference-
+free regularization framework. However, these methods typ-
+ically require reference images that are temporally adjacent,
+cloud-free, and highly consistent in land-cover content.
+3) Spatiotemporal Hybrid Methods: Spatiotemporal hybrid
+methods reconstruct missing area by combining spatial and
+temporal correlations across multi-temporal images. To address
+the missing data issue in Landsat ETM+ SLC-off imagery, Chen
+et al. [51] developed NSPI. Building on this foundation, Zhu et
+al. [52] further proposed a modified NSPI (MNSPI) by refining
+similar-pixel selection and applying a weighted linear model
+for thick cloud removal. Integrating local temporal correlations
+with non-local spatial correlations, Li et al. [53] proposed
+PM-MTGSR, a novel sparse representation approach driven
+by patch-matching. Ng et al. [54] proposed AWTC, which
+formulates gap filling as a weighted low-rank tensor recovery
+task. Chen et al. [55] developed spatiotemporal weighted
+regression (STWR) to estimate missing pixels. However,
+such methods often struggle with fine-detail reconstruction
+in complex, textured scenes and typically involve a high
+computational cost.
+B. Deep-Learning-Based Approaches
+Deep-learning-based approaches can be broadly categorized
+into single-image-based and sequence-based methods according
+to their input configurations.
+1) Single-Image-Based Methods: Single-image-based meth-
+ods typically reconstruct missing observations by leveraging
+a nearby cloud-free optical image or a SAR image as prior
+information. For instance, Ma et al. [15] proposed TIIN, which
+leverages spatial priors from adjacent optical images to improve
+dehazing performance.
+
+
+4
+Fig. 2: Overall workflow of data preprocessing.
+In addition, SAR can penetrate clouds and haze, enabling
+surface observations under all-weather conditions, and is
+therefore widely used to guide optical image reconstruction.
+For instance, Wang et al. [16] proposed USSRN-CR for
+thick cloud removal assisted by SAR data. Li et al. [17]
+developed a two-stage optical-SAR fusion model (HF-T2CR)
+that simultaneously removes thin and thick clouds. Pan et al.
+[18] introduced Mamba for thick cloud removal and proposed
+M3-CR. Single image-based methods have achieved notable
+progress in missing reconstruction. However, these methods are
+not well suited for time series reconstruction, as they neglect
+sequential correlations and require corresponding auxiliary data
+for each missing image.
+2) Sequence-Based Methods: Sequence-based methods typ-
+ically use multi-temporal image sequences as input to better
+exploit temporal dynamics and spatial correlations across
+observations. Some studies rely solely on optical image
+sequences with gaps to reconstruct the missing content. For
+example, Zhang et al. [19] developed PSTCR, which constructs
+Sentinel-2 MSI and Landsat-8 OLI patch groups to extract
+spatiotemporal features and effectively remove thick cloud.
+Stucker et al. [20] proposed U-TILISE to reconstruct optical
+time series imagery. It extracts spatial features with 2D
+convolutions and temporal features with 1D self-attention,
+thereby reconstructing gaps in Sentinel-2 time series imagery.
+Zhang et al. [14] proposed MS2TAN, which leverages multi-
+temporal information to convert incomplete sequences into
+complete ones, and effectively validated it on Landsat and
+Sentinel-2 data. Wang et al. [21] developed TAMGAN, a GAN-
+based framework that uses a 3D-convolutional generator for
+annual MODIS SR reconstruction.
+Another category of methods addresses missing observations
+in optical time series imagery by incorporating SAR data. For
+instance, Zhang et al. [22] proposed U-SeqNet that combines
+U-Net with a sequence-to-sequence architecture and exploits
+SAR-optical multimodal information to restore Landsat-8 time
+series images. Liu et al. [23] proposed STORI, which leverages
+a bidirectional recurrent architecture to integrate Sentinel-1
+and Sentinel-2 time series for robust optical reconstruction in
+cloud-prone regions. Shu et al. [24] developed RESTORE-DiT,
+a conditional diffusion framework that jointly uses Sentinel-1
+SAR and Sentinel-2 optical time series to reconstruct high-
+quality optical sequences. Tang et al. [25] developed Anytime-
+Former, which fuses irregular Sentinel-2 optical observations
+with asynchronous Sentinel-1 SAR time series to reconstruct
+SR at arbitrary timestamps. However, methods based on optical
+sequences or optical-SAR sequences typically rely heavily on
+the quality of optical or SAR imagery.
+III. Materials and Dataset Construction
+In this study, the MOD09A1 8-day composite SR product
+was utilized, as it effectively captures seasonal dynamics while
+mitigating the severe data gaps inherent in daily observations
+[56]. For the MCD12Q1 annual land cover product, the IGBP
+classification scheme was adopted because of its widespread
+use in global studies [57]. Given the scarcity of publicly
+available MODIS SR time series datasets, AIRMOD-TSR was
+constructed using Google Earth Engine (GEE).
+A. Materials
+The MOD09A1 SR product is provided at 500 m spatial
+resolution, contains 46 composites per year, and includes seven
+bands spanning the visible to shortwave infrared (SWIR): B1
+(620–670 nm), B2 (841–876 nm), B3 (459–479 nm), B4 (545–
+565 nm), B5 (1230–1250 nm), B6 (1628–1652 nm), and B7
+(2105–2155 nm). Correspondingly, the MCD12Q1 product
+provides annual land cover maps at the same 500 m spatial
+resolution, which is spatially consistent with the MOD09A1
+SR product and readily available, making it highly suitable as
+prior information for MODIS SR time series reconstruction.
+B. AIRMOD-TSR Construction
+As shown in Fig. 1, the regional and pixel-level annual
+missing ratios of global MOD09A1 data during 2019–2023
+were analyzed. The analysis indicates that severe data gaps are
+prevalent globally, rendering directly usable data extremely
+scarce. Consequently, we performed data preprocessing to
+construct AIRMOD-TSR for training and evaluation.
+1) Data Preprocessing: As shown in Fig. 2, the overall
+workflow of data preprocessing includes four steps: quality
+assurance, ROI selection, temporal linear interpolation, and
+patch cutting.
+Step 1: To ensure data reliability, composite-level quality
+filtering was first performed using the MOD09A1 quality
+
+
+5
+Fig. 3: Geographic locations and land cover composition of the AIRMOD-TSR ROIs. The dataset consists of 13 globally
+distributed ROIs (R1–R13). Red and yellow boxes denote high- and low-quality ROIs, respectively.
+assurance (QA) layers, with pixels affected by clouds, cloud
+shadows, aerosols, and snow/ice being masked.
+Step 2: As shown in Fig. 1, cumulative frequencies above
+10% are first reached at annual missing ratios of 30% for
+regions and 26.1% for pixels. Consequently, these values were
+adopted as thresholds for distinguishing high- and low-quality
+data. Based on this dual-level criterion, 11 high-quality ROIs
+and 2 low-quality ROIs were ultimately selected, each with a
+spatial size of 512 × 512 pixels.
+Step 3: Although stringent quality control yields relatively
+reliable SR time series, small gaps inevitably remain even in
+high-quality data. In these ROIs, the mean longest consecutive
+gap per year is 2.81 composites. To construct spatiotemporally
+continuous ground-truth labels for model training, the remaining
+gaps were filled using temporal linear interpolation [21],
+formulated as:
+𝑅0 = 𝑅𝑏+ 𝑇0 −𝑇𝑏
+𝑇𝑎−𝑇𝑏
+(𝑅𝑎−𝑅𝑏)
+(1)
+where 𝑅0 denotes the reflectance of the current pixel obtained
+by temporal linear interpolation; 𝑅𝑏and 𝑅𝑎denote the
+reflectance values at the nearest valid observation times before
+and after the current pixel in the time series, respectively; 𝑇0,
+𝑇𝑏, and 𝑇𝑎denote the acquisition dates of 𝑅0, 𝑅𝑏, and 𝑅𝑎,
+respectively, represented as the day of year (DOY).
+Step 4: Finally, to balance training efficiency and computa-
+tional resource constraints, a patch-based strategy was adopted,
+in which each sample image was divided into 64 × 64 patches
+with a 32-pixel overlap between adjacent patches.
+2) Description of AIRMOD-TSR: AIRMOD-TSR comprises
+SR time series and corresponding annual land cover maps
+for 13 representative ROIs worldwide. The dataset contains
+27 data groups in total, each corresponding to a full-year SR
+sequence for a single ROI. R1–R11 are high-quality ROIs,
+whereas R12–R13 are low-quality ROIs with corresponding
+missing masks provided. Each ROI covers 512 × 512 pixels,
+corresponding to approximately 65536 km2, and contains more
+than 10 IGBP land cover classes. AIRMOD-TSR provides data
+in the World Geodetic System 1984 (WGS84) coordinate system
+
+
+6
+TABLE I: Detailed information on the AIRMOD-TSR ROIs.
+Region
+ID
+Longitude
+range
+Latitude
+range
+Selected
+year(s)
+Annual mean
+missing ratio
+High-quality ROIs
+R1
+87.31◦W–
+89.61◦W
+32.17◦N–
+34.47◦N
+2019, 2022,
+2023
+20.78%
+R2
+80.83◦W–
+83.13◦W
+32.70◦N–
+35.00◦N
+2019, 2022,
+2023
+20.26%
+R3
+77.64◦W–
+79.94◦W
+35.32◦N–
+37.62◦N
+2019, 2020,
+2022, 2023
+18.70%
+R4
+93.07◦W–
+95.37◦W
+35.29◦N–
+37.59◦N
+2019, 2022,
+2023
+16.93%
+R5
+82.69◦W–
+84.99◦W
+30.83◦N–
+33.13◦N
+2019, 2022
+22.85%
+R6
+90.27◦W–
+92.57◦W
+36.53◦N–
+38.83◦N
+2019, 2022,
+2023
+19.76%
+R7
+87.12◦W–
+89.42◦W
+35.80◦N–
+38.10◦N
+2019, 2022,
+2023
+21.98%
+R8
+75.35◦W–
+77.65◦W
+38.77◦N–
+41.07◦N
+2022
+21.93%
+R9
+92.59◦W–
+94.89◦W
+32.33◦N–
+34.63◦N
+2022
+15.00%
+R10
+53.67◦W–
+55.97◦W
+28.78◦S–
+31.08◦S
+2022
+11.85%
+R11
+3.49◦W–
+5.79◦W
+37.54◦N–
+39.84◦N
+2023
+16.74%
+Low-quality ROIs
+R12
+113.02◦E–
+115.32◦E
+26.93◦N–
+29.23◦N
+2022
+60.11%
+R13
+117.43◦E–
+119.73◦E
+27.88◦N–
+30.18◦N
+2023
+54.22%
+at two spatial sizes, including complete 512×512 ROI data and
+64 × 64 patches, with SR values scaled to [0, 10000]. Fig. 3
+shows the geographical locations and land cover composition of
+these ROIs, while detailed information is provided in Table I.
+R1–R9 are primarily located in the southeastern United
+States. These ROIs are characterized by a humid subtropical
+climate and complex landscape heterogeneity. The land cover
+composition is dominated by woody savannas, savannas,
+deciduous broadleaf forests, mixed forests, and croplands,
+interspersed with grasslands, urban areas, and water bodies.
+R10 is located in southeastern South America (southern
+Brazil and northern Uruguay) and represents a typical Pampas
+landscape. It is dominated by savannas, grasslands, and crop-
+lands, with spatial patterns distinct from the training regions.
+As R10 lies in the opposite hemisphere from the other ROIs,
+it exhibits seasonal phase inversion, thereby increasing the
+difficulty of capturing phenological dynamics.
+R11 is located in southern Spain (Andalusia and Castilla-La
+Mancha) and represents a typical Mediterranean landscape. Its
+land cover is dominated by grasslands, croplands, savannas,
+woody savannas, and open shrublands.
+R12 and R13 are located in southern China under a
+subtropical humid monsoon climate, where persistent clouds
+and frequent precipitation cause severe missing observations
+in the MOD09A1 product. They feature highly heterogeneous
+and fragmented landscapes dominated by savannas, forests, and
+croplands.
+IV. Methodology
+A. Overview
+The proposed LC-TSRNet adopts a coarse-to-fine two-stage
+architecture for seamless reconstruction of annual MODIS SR
+time series. As illustrated in Fig. 4, the network consists of
+two stages: a land-cover-guided coarse representation stage and
+a spatio-temporal-spectral joint refinement stage. Considering
+the temporal characteristics of MODIS data, the SR time series
+with missing observations is organized as an input tensor 𝑋𝑠𝑟∈
+R𝐶×𝑇×𝐻×𝑊, where 𝐶and 𝑇denote the number of channels
+and time steps, respectively, and 𝐻and 𝑊denote the image
+height and width. The corresponding annual land cover map
+is represented as 𝑋𝑙𝑐∈R1×1×𝐻×𝑊and input to the model.
+Furthermore, considering that temporal variations in SR exhibit
+inherent regularity and strong correlations [6], all convolutional
+layers in LC-TSRNet employ 3D convolutions, as illustrated
+in Fig. 5(a).
+In the land-cover-guided coarse representation stage, a dual-
+branch architecture is designed to process the temporally
+incomplete SR time series and the prior reference SR, thereby
+generating a coarse representation. Specifically, the CSPM trans-
+forms the static land cover map into a full-year reference SR
+time series, providing physically consistent spectral constraints
+for missing regions in accordance with land cover dynamics,
+while standard convolutional (Conv) blocks are employed for
+feature extraction, as illustrated in Fig. 5(b). Meanwhile, the
+temporally incomplete SR branch adopts gated convolution
+(GConv) blocks to generate adaptive gating weights and extract
+valid features, as illustrated in Fig. 5(c). Finally, the output
+features from the two branches are progressively integrated by
+the progressive fusion module (PFM) to form an initial coarse
+representation.
+In the spatio-temporal-spectral joint refinement stage, multi-
+ple modules are jointly employed to impose spatio-temporal-
+spectral constraints on the coarse representation obtained from
+the first stage, thereby generating seamless SR time series
+with improved spatiotemporal continuity. First, the SMRM
+adaptively exploits multi-scale information according to the
+extent of missing data and enables deep cross-scale interaction
+of spatiotemporal contextual information through a progressive
+aggregation mechanism. Next, the 3DAM adaptively focuses
+on salient features across the temporal, spatial, and spectral
+dimensions and imposes joint cross-dimensional constraints,
+thereby enhancing local textures and structural details. Then,
+ConvLSTM is employed to model long-range temporal depen-
+dencies and ensure temporal consistency in the reconstructed
+sequences. Finally, multiple cascaded Conv blocks are used
+to map high-dimensional features back to the original data
+space, while residual skip connections are introduced to
+preserve information in valid regions. Through the coordinated
+refinement of these modules, the network outputs seamless SR
+time series ˆ𝑋∈R𝐶×𝑇×𝐻×𝑊with 46 composites and 7 bands.
+B. Stage One: Land-Cover-Guided Coarse Representation
+In the land-cover-guided coarse representation stage, the
+temporally incomplete SR time series and the annual land-cover
+map are taken as inputs to generate a coarse reconstruction
+
+
+7
+Fig. 4: Overall architecture of the proposed LC-TSRNet, consisting of a land-cover-guided coarse representation stage and a
+spatio-temporal-spectral joint refinement stage.
+Fig. 5: Illustration of (a) 3D convolution, (b) Conv block, and (c) GConv block.
+through dual-branch feature extraction and fusion. This stage
+mainly consists of three core components: CSPM, GConv block,
+and PFM.
+Specifically, the CSPM transforms land-cover semantic
+information into a full-year reference SR time series to provide
+spectral-radiometric prior constraints for missing regions. The
+GConv block suppresses invalid regions and extracts reliable
+features from the incomplete SR branch through adaptive gating.
+The PFM progressively integrates features from the reference
+SR and incomplete SR branches to form a unified coarse
+representation.
+1) CSPM: To impose effective prior constraints in MODIS
+SR time series reconstruction, land cover information is
+introduced as prior knowledge. The MCD12Q1 product, as an
+annual land cover dataset, is well matched to the MOD09A1
+SR product in spatial resolution and is readily available.
+Considering the significant spectral differences among different
+land cover classes and the relative spectral consistency within
+the same class [58], the CSPM is designed. The CSPM
+transforms semantic class knowledge from land cover maps
+into reference SR time series knowledge, thereby imposing
+spectral-radiometric constraints on missing regions that are
+consistent with the temporal dynamics of specific land cover
+types.
+Specifically, for a given land cover class 𝑐in the annual land
+cover map, all valid pixels (retained after QA) corresponding
+to this class are first selected from the incomplete MODIS SR
+time series. The mean SR value is then calculated for each
+composite and spectral band and used as the representative
+SR value of this class at the corresponding composite and
+band. By traversing all land cover classes, a typical spectral
+dictionary containing 17 classes, 46 time steps, and 7 bands is
+constructed. Finally, a lookup operation is performed on the
+spectral dictionary using the regional land cover map to generate
+a full-year reference SR time series. The schematic illustration
+of this process is shown in Fig. 6, and the representative SR
+value is calculated as follows:
+¯𝑅𝑐,𝑡,𝑏=
+1
+𝑁𝑐,𝑡
+∑︁
+𝑖∈Ω𝑐,𝑡
+𝑅𝑖,𝑡,𝑏
+(2)
+where ¯𝑅𝑐,𝑡,𝑏denotes the mean SR of class 𝑐at composite 𝑡
+and band 𝑏; 𝑅𝑖,𝑡,𝑏denotes the SR of pixel 𝑖at composite 𝑡
+and band 𝑏; Ω𝑐,𝑡denotes the set of valid pixels belonging to
+
+
+8
+Fig. 6: Schematic illustration of the CSPM.
+class 𝑐at composite 𝑡, which is shared across all bands after
+QA masking; and 𝑁𝑐,𝑡denotes the pixel count in Ω𝑐,𝑡.
+2) GConv Block: Optical imagery often contains a large
+proportion of invalid pixels. When standard convolutions are
+directly applied, features from invalid regions may propagate
+through the network, causing noise accumulation and con-
+taminating valid representations, which ultimately degrades
+reconstruction quality. To alleviate this issue, GConv blocks are
+introduced in the incomplete SR time series branch. Compared
+with the Conv block, the GConv block uses a sigmoid
+activation to generate explicit gating weights, thereby adaptively
+suppressing invalid regions and highlighting reliable pixels.
+This design enhances local spatiotemporal feature extraction
+and improves robustness under irregular gaps and persistently
+overlapping missing regions, as illustrated in Fig. 5(c).
+3) PFM: To obtain a unified coarse representation, the PFM
+is designed to integrate features from the dual branches, as
+illustrated in Fig. 7. Based on a progressive fusion strategy,
+the PFM performs element-wise addition on multi-level feature
+outputs to achieve complementary information integration,
+effectively compensating for missing regions while preserving
+reliable observations. Furthermore, the PFM preserves the dual-
+branch design, using Conv blocks and GConv blocks to extract
+features from the reference SR and incomplete SR branches,
+respectively.
+Fig. 7: Illustration of the PFM structure.
+C. Stage Two: Spatio-Temporal-Spectral Joint Refinement
+In the spatio-temporal-spectral joint refinement stage, the
+coarse representation generated in the first stage is taken as
+input, aiming to achieve refined reconstruction through joint
+spatio-temporal-spectral constraints and to generate seamless
+SR time series with 46 composites and 7 bands. This stage
+mainly consists of three core components: SMRM, 3DAM, and
+ConvLSTM.
+Specifically, the SMRM is used to adaptively exploit multi-
+scale spatiotemporal contextual information, the 3DAM is
+employed to adaptively enhance salient features across the
+temporal, spatial, and spectral dimensions, and the ConvLSTM
+is used to model long-range temporal dependencies. Through
+the coordinated refinement of these modules, this stage further
+improves the spatiotemporal continuity, spectral fidelity, and
+texture detail representation of the reconstructed results.
+1) SMRM: SR time series imagery exhibits pronounced
+multi-scale characteristics, where different land cover types
+show variability in spatial scales and temporal dynamics, while
+the extent of missing data is also unevenly distributed across
+spatiotemporal dimensions. Existing studies have demonstrated
+that multi-scale features play a crucial role in improving
+reconstruction quality [59], [60]. However, most existing
+methods rely on fixed local receptive fields or static multi-
+scale structures for feature extraction, lacking mechanisms to
+adaptively exploit multi-scale information according to the
+extent of missing data. As a result, these methods struggle
+to establish long-range spatiotemporal dependencies across
+large-area, persistent, and overlapping gaps.
+To address the above issues, the SMRM is proposed in
+this study. To adaptively exploit multi-scale spatiotemporal
+contextual information based on the coarse representation
+obtained in the first stage, the SMRM introduces a progressive
+aggregation mechanism that progressively propagates and fuses
+the outputs of coarse-scale branches into finer-scale branches.
+This design enables the model to adaptively leverage contextual
+information at different scales according to the extent of
+missing data: it relies more on large-scale context in regions
+
+
+9
+Fig. 8: Structure of the SMRM.
+with extensive missing data to compensate for insufficient
+local information, while preserving fine-grained structural and
+textural details in regions with valid observations. As illustrated
+in Fig. 8, the SMRM consists of multiple parallel branches,
+each employing 3D convolutions with different dilation rates
+(1, 6, 12, and 18) to capture multi-scale spatiotemporal features
+ranging from local textures to large-scale structures. Meanwhile,
+each branch incorporates multiple cascaded 3D residual blocks
+(3DRBs) to perform deep feature extraction and representation
+learning. The detailed process is described as follows:
+Given an input feature tensor 𝐹∈R𝐶×𝑇×𝐻×𝑊, the 𝑘-th
+branch first applies a 3D dilated convolution:
+𝐹𝑘= DConv𝑟𝑘(𝐹)
+(3)
+where DConv𝑟𝑘denotes a 3D convolution with dilation rate
+𝑟𝑘, and 𝑘= 1, 2, 3, 4 corresponds to dilation rates of 18, 12, 6,
+and 1, respectively.
+To enable cross-scale interaction, a progressive aggregation
+mechanism is adopted, where features from coarser-scale
+branches are propagated to finer-scale branches:
+𝐹′
+𝑘=
+(
+𝐹𝑘,
+𝑘= 1,
+Concat (𝐹𝑘,𝑌𝑘−1) ,
+𝑘∈{2, 3, 4}.
+(4)
+where Concat denotes channel-wise concatenation, and 𝑌𝑘−1
+denotes the output of the preceding coarser-scale branch.
+Each branch then performs deep feature extraction using
+multiple cascaded 3DRBs. Given the aggregated feature 𝐹′
+𝑘,
+the output of the 𝑘-th branch is obtained by concatenating
+intermediate and deeper representations:
+𝑌𝑘= Concat
+
+𝐹′
+𝑘
+(𝑚), 𝐹′
+𝑘
+(𝑛)
+(5)
+where 𝐹′
+𝑘
+(𝑚) and 𝐹′
+𝑘
+(𝑛) denote the outputs of the intermediate
+and deeper 3DRBs in the 𝑘-th branch, respectively.
+2) 3DAM: SR time series imagery contains highly coupled
+temporal, spatial, and spectral information, with strong intrinsic
+physical correlations across these dimensions [61]. Attention
+mechanisms are widely used in missing reconstruction tasks to
+adaptively reweight feature responses and highlight informative
+patterns [20], [21]. However, existing methods typically model
+these dimensions independently, lacking effective joint cross-
+dimensional constraints. To address this issue, we develop
+the 3DAM inspired by CBAM [62] and 3DACM [63]. As
+illustrated in Fig. 9, the 3DAM consists of temporal, spatial,
+and channel attention submodules, which perform adaptive
+feature reweighting along the temporal, spatial, and spectral
+dimensions, respectively, and establish joint spatio-temporal-
+spectral constraints through a parallel-cascaded structure.
+Specifically, given an input feature tensor 𝐹∈R𝐶×𝑇×𝐻×𝑊,
+channel attention and temporal attention are first computed in
+parallel. For channel attention, 3D average pooling and max
+pooling are performed over the temporal and spatial dimensions,
+respectively, and the resulting descriptors are fed into a shared
+multilayer perceptron (MLP). The outputs of the two branches
+are then summed and passed through a sigmoid function to
+generate the channel attention map 𝑀𝑐, which is used to
+reweight the input features via element-wise multiplication:
+𝑀𝑐= 𝜎(MLP(AvgPool(𝐹)) + MLP(MaxPool(𝐹)))
+(6)
+𝐹𝑐= 𝑀𝑐⊗𝐹
+(7)
+where 𝐹∈R𝐶×𝑇×𝐻×𝑊denotes the input feature tensor;
+𝑀𝑐∈R𝐶×1×1×1 is the channel attention map; 𝐹𝑐is the
+channel-attention-weighted feature map; 𝜎denotes the sigmoid
+activation function; and ⊗denotes element-wise multiplication.
+Temporal attention follows the same procedure after permut-
+ing the temporal and channel dimensions, performing pooling
+and the shared MLP over the channel and spatial dimensions
+
+
+10
+Fig. 9: Structure of the 3DAM.
+to generate a temporal attention map 𝑀𝑡. The features are then
+permuted back to the original order:
+˜𝐹= P𝐶↔𝑇(𝐹)
+(8)
+𝑀𝑡= 𝜎 MLP(AvgPool( ˜𝐹)) + MLP(MaxPool( ˜𝐹))
+(9)
+𝐹𝑡= P−1
+𝐶↔𝑇
+ 𝑀𝑡⊗˜𝐹
+(10)
+where ˜𝐹∈R𝑇×𝐶×𝐻×𝑊denotes the feature map after dimension
+permutation; P𝐶↔𝑇denotes the permutation operator that
+exchanges the channel and temporal dimensions, and P−1
+𝐶↔𝑇
+denotes its inverse; 𝑀𝑡∈R𝑇×1×1×1 is the temporal attention
+map; and 𝐹𝑡is the temporal-attention-weighted feature map.
+Subsequently, the outputs of channel and temporal attention
+are combined via element-wise addition and fed into the
+cascaded spatial attention submodule. For spatial attention,
+average pooling and max pooling are performed over the
+channel and temporal dimensions, respectively. The pooled
+features are concatenated along the channel dimension, followed
+by a 3D convolution for feature compression. A sigmoid
+function is then applied to generate the spatial attention map
+𝑀𝑠, which is used to further reweight the features:
+𝐹′ = 𝐹𝑐+ 𝐹𝑡
+(11)
+𝑀𝑠= 𝜎( 𝑓1×7×7 [AvgPool(𝐹′); MaxPool(𝐹′)])
+(12)
+𝐹𝑠= 𝑀𝑠⊗𝐹′
+(13)
+where 𝐹′ ∈R𝐶×𝑇×𝐻×𝑊denotes the feature after channel and
+temporal attention reweighting and element-wise summation;
+𝑀𝑠∈R1×1×𝐻×𝑊is the spatial attention map; 𝐹𝑠is the spatial-
+attention-weighted feature map; and 𝑓1×7×7 is a 3D convolution
+with a kernel size of 1 × 7 × 7.
+3) ConvLSTM: ConvLSTM [64] is introduced in the refine-
+ment stage to further model long-range temporal dependencies.
+Unlike standard LSTM [65], which models temporal depen-
+dencies through fully connected transformations, ConvLSTM
+replaces these operations with convolutional transformations,
+enabling temporal dependency modeling while preserving
+spatial structure. Therefore, ConvLSTM is well suited for
+MODIS SR time series reconstruction. By incorporating
+ConvLSTM, the model further enhances temporal consistency
+in the annual seamless SR time series.
+D. Loss Function
+To improve reconstruction accuracy, a composite loss func-
+tion 𝐿𝑚𝑟is adopted for the missing reconstruction task. The
+loss combines a pixel-wise loss 𝐿𝑝𝑖𝑥and a structural similarity
+(SSIM) [66] loss 𝐿𝑠𝑠𝑖𝑚to jointly enforce numerical accuracy
+and structural fidelity. It is defined as follows:
+𝐿𝑚𝑟= 𝐿𝑝𝑖𝑥+ 𝜆𝐿𝑠𝑠𝑖𝑚
+(14)
+where 𝜆is a balance factor between two loss term.
+The pixel-wise loss 𝐿𝑝𝑖𝑥treats an image as a collection of
+pixels and measures reconstruction errors using the 𝐿1 loss
+(MAE). To constrain reconstruction quality over both the full
+image and the missing regions, a global pixel loss 𝐿𝑔and a
+local pixel loss 𝐿𝑙are defined as follows:
+𝐿𝑝𝑖𝑥= 𝐿𝑔+ 𝐿𝑙
+(15)
+𝐿𝑔= 1
+𝑁
+𝐼−ˆ𝐼
+
+1
+(16)
+𝐿𝑙=
+1
+𝑁𝑚
+(𝐼−ˆ𝐼) ⊗(1 −𝑀)
+
+1
+(17)
+where ˆ𝐼and 𝐼denote the reconstructed and reference images,
+respectively; 𝑁denotes the total number of pixels; 𝑁𝑚denotes
+the number of pixels in the missing regions; 𝑀denotes the
+missing mask, where 1 indicates valid pixels and 0 indicates
+missing pixels; and ⊗denotes element-wise multiplication.
+The SSIM loss 𝐿𝑠𝑠𝑖𝑚further refines reconstruction details
+by constraining structural, contrast, and luminance differences
+between the reconstructed result and the target image. It is
+computed as follows:
+𝐿𝑠𝑠𝑖𝑚= 1 −SSIM(𝐼, ˆ𝐼)
+(18)
+SSIM(𝐼, ˆ𝐼) =
+(2𝜇𝐼𝜇ˆ𝐼+ 𝐶1)(2𝜎𝐼ˆ𝐼+ 𝐶2)
+(𝜇2
+𝐼+ 𝜇2
+ˆ𝐼+ 𝐶1)(𝜎2
+𝐼+ 𝜎2
+ˆ𝐼+ 𝐶2)
+(19)
+
+
+11
+Fig. 10: The regional temporal missing ratios and pixel-level annual missing ratios under different scenarios. (a) Spatially
+adjacent scenario (R9). (b) Cross-hemisphere scenario (R10). (c) Persistent and overlapping missing scenario (R11).
+where 𝜇𝐼and 𝜇ˆ𝐼denote the means of 𝐼and ˆ𝐼, respectively;
+𝜎2
+𝐼and 𝜎2
+ˆ𝐼denote their variances; 𝜎𝐼ˆ𝐼denotes the covariance
+between 𝐼and ˆ𝐼; and 𝐶1 and 𝐶2 are constants.
+V. Experiments and Results
+A. Experimental Settings
+1) Dataset Settings: All experiments are conducted on
+AIRMOD-TSR. R1–R8 are used for model training and
+validation, containing 4950 samples in total. These samples
+are divided into training and validation sets at a ratio of 4 : 1.
+To enhance sample diversity, data augmentation is performed
+during training by randomly rotating each input by 0◦, 90◦,
+180◦, or 270◦.
+Three high-quality ROIs are used as independent test regions
+under different missing scenarios. R9 represents the spatially
+adjacent scenario, as it is geographically close to the training
+ROIs. R10 represents the cross-hemisphere scenario, where
+seasonal phase inversion increases the difficulty of phenologi-
+cal reconstruction. R11 represents the persistent overlapping
+missing scenario for evaluating model robustness.
+For all test scenarios, real MODIS missing masks obtained
+from GEE are applied to the high-quality ROIs to simulate
+realistic missing patterns. Fig. 10 shows the regional temporal
+missing ratios and pixel-level annual missing ratios after mask
+simulation. The temporal missing ratios range from 1.14%
+to 100% for R9, from 1.13% to 100% for R10, and from
+21.69% to 79.11% for R11. In R11, consecutive missing masks
+are further used to simulate persistent overlapping gaps. To
+facilitate visual comparison, three representative dates with
+different missing ratios and phenological stages are selected
+for each scenario, as indicated by the stars in Fig. 10.
+2) Implementation Details: The model is implemented using
+PyTorch 2.5.1. Training and testing are performed on an Ubuntu
+22.04 workstation equipped with NVIDIA RTX 4090 GPUs.
+The model is trained for 80 epochs with a batch size of 6
+and an initial learning rate of 0.001. A validation-loss-based
+adaptive decay schedule is adopted, where the learning rate
+is reduced by a factor of 0.5 if the validation loss does not
+improve for four consecutive epochs. The Adam optimizer is
+used with 𝛽1 = 0.9 and 𝛽2 = 0.99. The loss balancing factor
+𝜆is set to 0.2.
+3) Comparison Methods: Six representative and widely used
+reconstruction methods are selected for comparison, including
+two conventional methods, WLR [49] and MNSPI [52], and four
+deep learning methods, PSTCR [19], U-TILISE [20], TAMGAN
+[21], and MS2TAN [14]. WLR is treated as a single-image-
+based method, whereas the remaining methods are sequence-
+based. For MODIS SR time series reconstruction, WLR uses
+the composite with the lowest missing ratio among the 46
+composites as the reference image, while PSTCR divides the
+sequence into five-composite subsets according to acquisition
+time and performs group-wise reconstruction.
+4) Evaluation Metrics: To quantitatively evaluate reconstruc-
+tion performance, four widely used metrics are adopted: peak
+signal-to-noise ratio (PSNR) [67], structural similarity index
+measure (SSIM) [66], correlation coefficient (CC) [68], and
+spectral angle mapper (SAM) [69]. Specifically, PSNR and CC
+
+
+12
+Fig. 11: Time series quantitative evaluation of the reconstruction performance of different methods under the spatially adjacent
+scenario (R9). The shaded area represents the missing ratio for each composite. (a) PSNR. (b) SSIM. (c) CC. (d) SAM.
+assess pixel-level accuracy, SAM quantifies spectral similarity
+by measuring the spectral angle between reconstructed and
+reference pixels, and SSIM evaluates structural similarity
+between reconstructed and reference images. In addition, root
+mean square error (RMSE) [70] is reported as an auxiliary
+metric to further characterize reconstruction quality.
+B. Spatially Adjacent Scenario
+In this section, the reconstruction accuracy of different
+methods is compared under the spatially adjacent scenario
+(R9), where the test ROI is geographically close to the training
+ROIs.
+1) Quantitative Results: Table II summarizes the quantitative
+evaluation of different methods on R9, with all metrics averaged
+across the 46 composites. The best performance is obtained
+by LC-TSRNet across all metrics. Compared with the second-
+best result for each metric, LC-TSRNet improves PSNR by
+0.56 dB and reduces SAM by 8.90%. These results indicate
+that LC-TSRNet achieves lower reconstruction errors, better
+preservation of texture structures, and higher spectral fidelity
+under the spatially adjacent scenario.
+Fig. 11 presents the time series quantitative evaluation of the
+reconstruction performance on R9. Overall, the metrics track
+the missing ratio: higher missing ratios generally lead to lower
+PSNR, SSIM, and CC values, as well as higher SAM values.
+This indicates that the reconstruction of SR images with large-
+area gaps is more challenging. Among the comparison methods,
+PSTCR and U-TILISE show relatively poor performance on
+most dates, with pronounced temporal fluctuations in the
+evaluation metrics. This may be attributed to the sensitivity of
+PSTCR to the quality of multi-temporal inputs and the limited
+temporal modeling capability of U-TILISE. WLR, MNSPI,
+TABLE II: Quantitative evaluation of the time series recon-
+struction performance of different methods under the spatially
+adjacent scenario (R9). Values are averaged across all 46
+composites, with the best and second-best results indicated
+by boldface and underlining, respectively.
+Methods
+PSNR (dB) ↑
+SSIM ↑
+CC ↑
+SAM (◦) ↓
+WLR (2013)
+38.3745
+0.9130
+0.9865
+1.8680
+MNSPI (2012)
+39.1155
+0.9251
+0.9884
+1.5112
+PSTCR (2020)
+31.1337
+0.8593
+0.9607
+2.1439
+U-TILISE (2023)
+32.4606
+0.8711
+0.9737
+2.1982
+TAMGAN (2025)
+37.5036
+0.9386
+0.9891
+1.4871
+MS2TAN (2025)
+38.9208
+0.9401
+0.9878
+1.9728
+LC-TSRNet (Ours)
+39.6724
+0.9519
+0.9915
+1.3548
+TAMGAN, and MS2TAN perform well at low missing ratios
+but degrade markedly as the missing ratio increases, suggesting
+limited robustness to large-area gaps. In contrast, LC-TSRNet
+maintains consistently superior performance throughout the
+year, demonstrating stronger robustness to varying missing
+ratios.
+2) Qualitative Results: Fig. 12 presents the reconstruction
+results on R9 for three representative dates. The selected dates
+(20220125, 20220407, and 20220501) correspond to the winter
+stable period, rapid leaf expansion stage, and vigorous growth
+stage, with missing ratios of 28.93%, 88.88%, and 100.00%,
+respectively. As shown in Fig. 12(a), under a lower missing ratio,
+satisfactory reconstruction results are obtained by most methods
+except PSTCR and U-TILISE. This may be attributed to the
+use of 2D convolution operations in PSTCR and U-TILISE, as
+well as their strong dependence on the quality of input data;
+when local information is severely insufficient, over-smoothing
+
+
+13
+Fig. 12: Visual comparison of reconstruction results on three representative dates under the spatially adjacent scenario (R9).
+Standard false-color composites are shown using B2, B1, and B4. For each date, the complete scene is shown in the upper row,
+the 80 × 80-pixel subregion marked by the yellow box is enlarged in the middle row, and the corresponding RMSE map of the
+enlarged region is presented in the lower row.
+and loss of texture details are likely to occur. As shown in
+Fig. 12(b)–(c), under higher missing ratios, the reconstruction
+quality of the comparison methods decreases markedly. Large
+reconstruction errors and obvious color deviations are observed
+in WLR. The results of MNSPI suffer from over-smoothing and
+cross-shaped stripe artifacts, making it difficult to recover local
+texture details. PSTCR and U-TILISE also show texture loss and
+over-smoothing. TAMGAN exhibits strong generative capability,
+but the RMSE map still shows locally high reconstruction
+errors. MS2TAN divides images into tokens for modeling
+based on the Vision Transformer architecture, which can easily
+introduce blocky artifacts. In contrast, LC-TSRNet consistently
+reconstructs texture details close to the reference values under
+different missing ratios, thereby providing the best overall visual
+quality.
+
+
+14
+Fig. 13: Band-wise RMSE analysis of reconstruction results in the spatially adjacent scenario (R9). (a) Annual mean RMSE of
+different methods across the seven bands. (b) Time series RMSE curves of LC-TSRNet for each band.
+3) Band-Wise Reconstruction Performance: To further in-
+vestigate the band-wise reconstruction performance of different
+methods, the RMSE is calculated separately for each band of
+the reconstructed SR time series and averaged over all pixels.
+As shown in Fig. 13(a), LC-TSRNet achieves the lowest RMSE
+across all seven bands, with relatively small inter-band variation.
+In contrast, PSTCR and U-TILISE produce substantially higher
+RMSE than the other methods in all bands. A consistent band-
+wise pattern is observed across different methods: RMSE is
+relatively low in the visible bands (B3, B4, and B1), increases
+with wavelength, reaches its maximum in the near-infrared
+(NIR) band (B2), and then gradually decreases in the SWIR
+bands (B5, B6, and B7).
+To interpret these inter-band differences, the band-wise
+time series RMSE curves of LC-TSRNet are further plotted
+in Fig. 13(b). According to the land cover map, vegetation
+accounts for 97.6% of R9, indicating that the overall RMSE
+pattern is mainly dominated by reconstruction errors over
+vegetated pixels. As shown in Fig. 13(b), the RMSE of the NIR
+band remains relatively high and exhibits stronger temporal
+fluctuations throughout the year, especially during the rapid
+vegetation growth period from approximately April to July.
+This is mainly because NIR reflectance is highly sensitive to
+rapid changes in canopy structure and vegetation physiological
+conditions, which may occur within time intervals shorter than
+the 8-day compositing period of MOD09A1. In addition, the
+land cover prior derived from MCD12Q1 is updated annually
+and therefore cannot fully capture short-term phenological
+variations. When high missing ratios occur during the rapid
+growth period, the severe lack of valid spatial observations
+forces the model to rely more heavily on temporal information
+to infer missing regions, resulting in larger RMSE values than
+those observed in other periods with comparable missing ratios,
+as highlighted by the blue arrows in Fig. 13(b).
+4) Spectral Fidelity Analysis of Typical Land Cover Types:
+The test ROI covers a large spatial extent and includes diverse
+land cover types. To further evaluate the spectral fidelity of
+the reconstructed imagery, SR curve analysis of typical land
+cover types is conducted.
+First, the image acquired on 20220906 is selected to compare
+the SR curves of five typical land cover types, including
+deciduous broadleaf forests, mixed forests, croplands, urban and
+
+
+15
+Fig. 14: Comparison of reconstructed SR curves for typical land cover types derived from the R9 image acquired on 20220906.
+The spatial locations of selected samples are also shown. (a) Deciduous broadleaf forests. (b) Mixed forests. (c) Croplands. (d)
+Urban and built-up lands. (e) Water bodies. (f) Spatial locations of selected samples.
+built-up lands, and water bodies, as shown in Fig. 14. Overall,
+the spectral curves produced by LC-TSRNet are closest to the
+original observations across all five land cover types, indicat-
+ing its excellent spectral fidelity. Specifically, in deciduous
+broadleaf forests, MS2TAN shows obvious underestimation
+in the NIR band. In mixed forests, U-TILISE exhibits clear
+overestimation in the NIR band. In croplands, relatively large
+spectral deviations are produced by all comparison methods
+in the NIR band, suggesting that spectral reconstruction in
+densely vegetated areas remains challenging. In urban and
+built-up lands, obvious underestimation is observed in the
+infrared bands for PSTCR and TAMGAN, whereas U-TILISE
+shows clear overestimation. In water bodies, WLR tends to
+overestimate reflectance in the infrared bands.
+In addition, for vegetation types with strong temporal
+dynamics, SR variations are largely driven by phenological
+processes and therefore exhibit pronounced seasonal changes.
+Fig. 15 compares the reconstructed time series SR curves of
+two representative vegetation samples, including deciduous
+broadleaf forests and croplands, with temporal missing ratios
+of 58.70% and 52.17%, respectively. Under short-term missing
+conditions, most methods can generally follow the seasonal
+variation of the ground truth. However, under persistent long-
+term gaps, such as the continuous missing period from May to
+July for deciduous broadleaf forests, larger spectral deviations
+and stronger temporal fluctuations are observed in the com-
+parison methods. In contrast, the SR curves reconstructed by
+LC-TSRNet are closer to the ground truth throughout the year,
+indicating stronger robustness to persistent missing observations
+and better preservation of key phenological patterns.
+C. Cross-Hemisphere Scenario
+In this section, the generalization capability of different
+methods is evaluated in the cross-hemisphere scenario (R10),
+where the test ROI is geographically distant from the training
+ROIs.
+1) Quantitative Results: Table III summarizes the quan-
+titative evaluation of different methods on R10, with all
+metrics averaged across the 46 composites. Compared with R9,
+performance degradation is observed for all methods across all
+
+
+16
+Fig. 15: Comparison of reconstructed time series SR curves over vegetated areas. Blue shaded areas indicate dates with missing
+observations. (a) Deciduous broadleaf forests. (b) Croplands.
+metrics, reflecting the increased reconstruction difficulty caused
+by substantial geographic and seasonal differences between the
+training and test ROIs. Nevertheless, the best performance is
+still obtained by LC-TSRNet across all metrics. Compared with
+the second-best result for each metric, LC-TSRNet improves
+PSNR by 0.32 dB and reduces SAM by 6.20%, indicating
+reduced spectral bias under the cross-hemisphere scenario.
+Fig. 16 presents the time series quantitative evaluation
+of the reconstruction performance on R10. PSTCR and U-
+TILISE generally perform worse than the other methods and
+exhibit larger temporal fluctuations in the evaluation metrics,
+indicating limited generalization under the cross-hemisphere
+
+
+17
+Fig. 16: Time series quantitative evaluation of the reconstruction performance of different methods under the cross-hemisphere
+scenario (R10). The shaded area represents the missing ratio for each composite. (a) PSNR. (b) SSIM. (c) CC. (d) SAM.
+TABLE III: Quantitative evaluation of the time series recon-
+struction performance of different methods under the cross-
+hemisphere scenario (R10). Values are averaged across all 46
+composites, with the best and second-best results indicated by
+boldface and underlining, respectively.
+Methods
+PSNR (dB) ↑
+SSIM ↑
+CC ↑
+SAM (◦) ↓
+WLR (2013)
+35.8984
+0.8808
+0.9821
+2.1624
+MNSPI (2012)
+37.0999
+0.9097
+0.9867
+1.5321
+PSTCR (2020)
+28.8164
+0.8243
+0.9526
+2.2271
+U-TILISE (2023)
+32.4131
+0.8670
+0.9776
+2.1690
+TAMGAN (2025)
+34.9539
+0.9196
+0.9864
+1.5806
+MS2TAN (2025)
+35.8663
+0.9050
+0.9840
+2.1591
+LC-TSRNet (Ours)
+37.4161
+0.9348
+0.9894
+1.4371
+scenario. On several dates with high missing ratios, WLR
+and MS2TAN show sharp decreases in SSIM and increases in
+SAM, suggesting insufficient robustness to severe observation
+gaps. In contrast, LC-TSRNet maintains stable and accurate
+reconstruction performance across the time series, even under
+high missing ratios, demonstrating strong generalization to
+heterogeneous cross-hemisphere conditions.
+2) Qualitative Results: Fig. 17 presents the reconstruction
+results on R10 for three representative dates. The selected dates
+(20220930, 20220330, and 20221016) correspond to the early
+growth stage, vegetation senescence stage, and rapid growth
+stage, with missing ratios of 23.60%, 73.04%, and 93.86%,
+respectively. Similar to the reconstruction performance on R9,
+satisfactory visual reconstruction results are obtained by most
+methods under the lower missing ratio, except that PSTCR and
+WLR exhibit a certain degree of over-smoothing, as shown in
+Fig. 17(a). As the missing ratio increases, the reconstruction
+quality of the comparison methods decreases noticeably. Due
+to the Laplacian-prior regularization adopted by WLR, texture
+structure loss is likely to occur in regions with insufficient
+available auxiliary pixels, and this phenomenon is particularly
+evident in the bottom region of the image on 20221016. As
+shown in Fig. 17(b)–(c), severe artifacts and texture blurring are
+observed in the MNSPI results, making it difficult to recover
+local details effectively. PSTCR and WLR also show obvious
+texture loss and blurring. Although TAMGAN has strong
+generative capability, color distortion still remains. MS2TAN
+continues to exhibit blocky artifacts under high missing ratios.
+In contrast, LC-TSRNet robustly restores texture details and
+color information close to the reference images across different
+missing ratios, while maintaining consistently low RMSE
+values, indicating strong generalization capability in the cross-
+hemisphere scenario.
+TABLE IV: Quantitative evaluation of the time series recon-
+struction performance of different methods under the persistent
+and overlapping missing scenario (R11). Values are averaged
+across 8 composites, with the best and second-best results
+indicated by boldface and underlining, respectively.
+Methods
+PSNR (dB) ↑
+SSIM ↑
+CC ↑
+SAM (◦) ↓
+WLR (2013)
+30.5794
+0.8541
+0.9586
+1.9029
+MNSPI (2012)
+32.1557
+0.8524
+0.9757
+1.9190
+PSTCR (2020)
+24.4754
+0.6779
+0.8886
+3.2217
+U-TILISE (2023)
+28.0706
+0.7981
+0.9528
+2.9854
+TAMGAN (2025)
+30.8160
+0.8734
+0.9745
+1.9762
+MS2TAN (2025)
+32.0039
+0.8875
+0.9749
+1.8996
+LC-TSRNet (Ours)
+32.3261
+0.8931
+0.9774
+1.8807
+
+
+18
+Fig. 17: Visual comparison of reconstruction results on three representative dates under the cross-hemisphere scenario (R10).
+Standard false-color composites are shown using B2, B1, and B4. For each date, the complete scene is shown in the upper row,
+the 80 × 80-pixel subregion marked by the yellow box is enlarged in the middle row, and the corresponding RMSE map of the
+enlarged region is presented in the lower row.
+D. Persistent and Overlapping Missing Scenario
+In this section, the robustness of different methods is assessed
+under the persistent overlapping missing scenario (R11). With
+an average missing ratio of 52.47% and a minimum missing
+ratio of 21.69%, R11 contains no relatively complete high-
+quality images, making it a challenging case for gap filling.
+1) Quantitative Results: Table IV summarizes the quantita-
+tive evaluation of different methods on R11, with all metrics
+averaged over eight consecutive composites from 20230330
+to 20230525. The missing ratios of these composites range
+from 66.36% to 69.76%, representing a persistent overlapping
+missing scenario. Compared with R9 and R10, all methods
+exhibit further degradation across the evaluation metrics,
+demonstrating the greater reconstruction difficulty caused
+by continuous large-area missing observations. Despite this
+challenging condition, the best performance is still obtained
+
+
+19
+Fig. 18: Visual comparison of reconstruction results on three representative dates under the persistent and overlapping missing
+scenario (R11). Standard false-color composites are shown using B2, B1, and B4. For each date, the complete scene is shown
+in the upper row, the 80 × 80-pixel subregion marked by the yellow box is enlarged in the middle row, and the corresponding
+RMSE map of the enlarged region is presented in the lower row.
+by LC-TSRNet across all metrics.
+2) Qualitative Results: Fig. 18 presents the reconstruction
+results on R11 for three representative dates. The selected
+dates (20230330, 20230423, and 20230525) correspond to
+the transition from the vigorous vegetation growth stage to
+the early senescence stage. Due to the absence of relatively
+complete reference images, WLR mainly relies on Laplacian-
+prior regularization to fill regions with limited reference pixels,
+leading to obvious over-smoothing and texture loss. MNSPI,
+PSTCR, and U-TILISE also suffer from severe texture loss
+and relatively large RMSE values. TAMGAN and MS2TAN
+exhibit evident color bias and large reconstruction errors,
+particularly on 20230423 and 20230525. In contrast, LC-
+TSRNet preserves clearer textures and more consistent color
+information, demonstrating stronger robustness under persistent
+overlapping gaps.
+
+
+20
+TABLE V: Quantitative ablation study of LC-TSRNet under the spatially adjacent scenario (R9) and cross-hemisphere scenario
+(R10). Values are averaged across all 46 composites, with the best results indicated by boldface.
+Methods
+R9
+R10
+Land Cover
+CSPM
+SMRM
+3DAM
+PSNR (dB) ↑
+SSIM ↑
+CC ↑
+SAM (◦) ↓
+PSNR (dB) ↑
+SSIM ↑
+CC ↑
+SAM (◦) ↓
+×
+×
+✓
+✓
+38.6871
+0.9465
+0.9901
+1.4707
+31.2672
+0.8976
+0.9582
+2.2841
+✓
+×
+✓
+✓
+39.0090
+0.9490
+0.9909
+1.4496
+33.3313
+0.9079
+0.9828
+1.9829
+✓
+✓
+×
+✓
+39.4310
+0.9474
+0.9912
+1.4902
+37.1209
+0.9310
+0.9887
+1.5843
+✓
+✓
+✓
+×
+38.9883
+0.9456
+0.9906
+1.4884
+37.0544
+0.9331
+0.9889
+1.5165
+✓
+✓
+✓
+✓
+39.6724
+0.9519
+0.9915
+1.3548
+37.4161
+0.9348
+0.9894
+1.4371
+Fig. 19: Visual comparison of ablation results for the land cover prior and CSPM in the spatially adjacent scenario (R9) and
+cross-hemisphere scenario (R10). (a) R9-20220322. (b) R9-20221203. (c) R10-20220202. (d) R10-20221024.
+E. Ablation studies
+To investigate the contributions of individual modules and
+the land cover prior, ablation studies are conducted under
+the spatially adjacent scenario (R9) and the cross-hemisphere
+scenario (R10). When the land cover prior is removed, only
+incomplete SR time series are used as input. When CSPM
+is removed, land cover class labels are directly used as input.
+When SMRM is removed, only a single branch with a dilation
+rate of 1 is retained. When 3DAM is removed, the multi-scale
+representations are first refined by a convolution unit and then
+fed into ConvLSTM to model long-term temporal dependencies.
+1) Quantitative Results: Table V summarizes the ablation
+results of five settings: removing the land cover prior, CSPM,
+SMRM, and 3DAM, and using the complete LC-TSRNet.
+The results show that removing any component degrades the
+reconstruction performance on both R9 and R10, confirming
+the effectiveness of each component in the proposed frame-
+work. Among them, the land cover prior and CSPM provide
+particularly notable improvements. For the geographically
+distant R10 region, introducing the land cover prior improves
+PSNR by 6.60% and reduces SAM by 13.19% compared with
+using only incomplete SR time series. Furthermore, compared
+with directly using land cover labels, CSPM further improves
+PSNR by 12.26% and reduces SAM by 27.53%. These results
+indicate that land cover information enhances cross-region
+reconstruction, while CSPM further improves spectral fidelity
+by converting semantic labels into spectral priors.
+2) Qualitative Results: Fig. 19 presents the ablation results
+of the land cover prior and CSPM on R9 and R10. When the
+land cover prior is removed, noticeable black speckle artifacts
+appear in the reconstructed images. This is mainly because
+the model relies only on the incomplete SR branch, where
+gated convolutions may over-suppress feature responses in
+
+
+21
+Fig. 20: Visual comparison of masked real observation time series and LC-TSRNet reconstruction results in the real-world
+scenario (R12). (a) Masked real observation time series. (b) Reconstruction results of LC-TSRNet.
+severely missing regions, leading to localized reconstruction
+failures. When CSPM is removed, distinct color deviations
+and residual noise are observed in several regions, indicating
+that directly using land cover labels cannot provide sufficient
+spectral constraints. These results further demonstrate the
+importance of land cover guidance and class-specific spectral
+priors for stable and spectrally consistent reconstruction.
+VI. Discussion
+A. Reconstruction Performance under Real-world Scenario
+To evaluate reconstruction performance under real-world
+observation conditions, R12 is selected as the ROI for real-
+data experiments. In 2022, the average missing ratio of the
+46 composites in R12 reaches 62.81%, with several dates
+approaching complete missingness.
+Fig. 20 shows the masked real observed SR time series
+on R12 and the corresponding reconstruction results of LC-
+TSRNet. The real observations exhibit a distinct temporally
+uneven missing patterns, with relatively complete observations
+on some dates and severe data gaps on others. In particular,
+large-area gaps persist for nearly two consecutive months
+from 20220101 to 20220226, posing a substantial challenge to
+the reconstruction capability of the model. Nevertheless, LC-
+TSRNet is still able to reconstruct spatially continuous images,
+with smooth transitions between reconstructed regions and
+originally valid observations and without obvious boundary
+artifacts. In addition, the reconstructed images on adjacent
+dates maintain good consistency in texture structures and color
+information. For other severely missing dates, such as 20220509,
+20220525, 20221016, and 20221227, LC-TSRNet also achieves
+satisfactory reconstruction results. These results indicate that
+LC-TSRNet has strong robustness and practical applicability
+under real-world observation conditions, providing an effective
+solution for generating seamless MOD09A1 SR product from
+incomplete observations.
+B. Applications in Vegetation Monitoring
+Time-series-continuous and high-quality SR imagery is
+essential for vegetation growth monitoring. The normalized dif-
+ference vegetation index (NDVI) is widely used to characterize
+vegetation conditions. Therefore, NDVI time series provide an
+effective way to evaluate both the applicability of reconstructed
+imagery for vegetation monitoring and the temporal spectral
+fidelity of reconstructed SR data. To this end, the R13 region
+
+
+22
+Fig. 21: Visual comparison of observed and reconstructed SR and NDVI time series in the application region (R13). (a)
+Observed time series. (b) Reconstruction results of LC-TSRNet.
+Fig. 22: Time series NDVI curves for two sample points and their spatial locations. (a) Point A–croplands. (b) Point B–mixed
+forests. (c) Spatial locations and land cover information of two points.
+in southeastern China is selected as a case study. Located in a
+subtropical humid monsoon climate zone, this region suffers
+from severe missing observations throughout the year, providing
+a challenging scenario for time series reconstruction.
+Fig. 21 shows the SR images before and after reconstruction
+on selected dates, together with the corresponding NDVI maps.
+The NDVI derived from the original observations exhibits pro-
+nounced spatial discontinuities and missing values; in missing
+regions, NDVI is often underestimated and may approach zero.
+In contrast, the NDVI derived from the reconstructed imagery
+is spatially and temporally continuous and follows a typical
+low–high–low seasonal trajectory.
+To further examine the temporal spectral fidelity of the
+reconstructed SR data, the global 0.05◦MODIS NDVI seamless
+data cube (SDC-NDVI) is used as an external reference. This
+product is derived from the global 500 m MODIS SR seamless
+data cube [71]. Two sample points representing croplands
+and mixed forests are selected for comparison. Fig. 22(a)–
+(b) presents the daily SDC-NDVI curves and the NDVI curves
+derived from LC-TSRNet reconstructions for the two sample
+
+
+23
+points. Point A is located in croplands in Quzhou City,
+Zhejiang Province, China, where double-cropping rice is widely
+cultivated. Early rice is typically transplanted from mid-to-late
+April to early May and harvested from late July to early August,
+followed by the transplantation of late rice. Harvesting generally
+begins in November. Point B is located in mixed forests and
+exhibits a smooth seasonal cycle, and NDVI remains relatively
+high for much of the year. Overall, the reconstructed NDVI
+agrees well with the SDC-NDVI product in terms of both
+magnitude and seasonal dynamics, indicating that LC-TSRNet
+can reliably preserve temporal spectral fidelity and characterize
+vegetation phenology across different land cover types.
+C. Limitations and Future Work
+Although LC-TSRNet performs well in MODIS SR time se-
+ries reconstruction, it still has several limitations. First, the land
+cover product and the SR product are mismatched in temporal
+scale. MCD12Q1 is provided annually, whereas MOD09A1 is
+an 8-day composite product with 46 observations per year.
+The ablation results in Section V-E confirm that a single
+annual land cover map can provide effective prior information;
+however, abrupt intra-annual land surface changes, such as
+seasonal snow/ice cover and wildfire disturbances, cannot be
+fully captured. This temporal mismatch may introduce biases
+into the reference SR and subsequently affect reconstruction
+accuracy.
+Second, although the proposed method shows robustness un-
+der large-area, persistent, and overlapping gaps, long periods of
+complete data gaps remain challenging, such as those frequently
+observed in the Amazon Basin. When valid observations are
+absent for extended periods, information from neighboring
+dates and spatial contexts becomes insufficient. Under such
+conditions, reconstruction relies more heavily on the reference
+SR derived from the land cover map, which may lead to
+deviations from the actual surface conditions.
+Future work will focus on addressing these limitations.
+Additional prior information, such as meteorological variables
+and topographic features, will be incorporated to further
+improve reconstruction fidelity. In addition, the dataset will
+be expanded to include a broader range of challenging global
+scenarios, such as prolonged complete cloud cover and seasonal
+snow/ice contamination, with the aim of further enhancing the
+generalization capability and robustness of the proposed method
+in real-world applications.
+VII. Conclusion
+In this study, a land-cover-guided two-stage method (LC-
+TSRNet) is proposed for seamless reconstruction of annual
+MODIS SR products. In the first stage, an annual land cover
+map is introduced, and the CSPM is designed to transform
+land cover classes into reference SR time series, thereby
+providing prior spectral constraints for missing regions and
+generating coarse representations. This alleviates the lack of
+reliable prior constraints in MODIS SR reconstruction. In the
+second stage, the SMRM adaptively exploits and integrates
+multi-scale spatiotemporal contextual information through
+parallel multi-scale branches and a progressive aggregation
+mechanism, enabling the effective reconstruction of large-area,
+persistent, and overlapping gaps. Subsequently, the 3DAM
+imposes cross-dimensional joint constraints through three
+parallel-cascaded attention submodules, thereby enabling the
+collaborative utilization of spatio-temporal-spectral information
+in SR time series. As a result, seamless SR time series with
+rich texture details and high spectral consistency are generated.
+In addition, considering the lack of publicly available MODIS
+sample datasets, the AIRMOD-TSR dataset is constructed. It
+contains annual MODIS SR time series and corresponding
+annual land cover maps for 13 representative ROIs worldwide.
+Extensive experiments on AIRMOD-TSR demonstrate that LC-
+TSRNet outperforms the comparison methods in reconstruction
+accuracy and exhibits stronger generalization capability and
+robustness. The vegetation monitoring application further
+verifies the temporal spectral fidelity and practical value of the
+proposed method.
+References
+[1] Y. Fu, Z. Zhu, L. Liu, W. Zhan, T. He, H. Shen, J. Zhao, Y. Liu, H. Zhang,
+Z. Liu et al., “Remote sensing time series analysis: A review of data
+and applications,” J. Remote Sens., vol. 4, p. 0285, 2024.
+[2] J. Brinkhoff, R. Houborg, and A. Clark, “Empirical correction of Sentinel-
+2 time series data to enhance real-time rice crop monitoring,” IEEE J.
+Sel. Topics Appl. Earth Observ. Remote Sens., vol. 18, pp. 25 391–25 409,
+2025.
+[3] Z. Liu, D. He, Q. Shi, and X. Cheng, “NDVI time-series data recon-
+struction for spatial-temporal dynamic monitoring of Arctic vegetation
+structure,” Geo-spatial Inf. Sci., vol. 28, no. 2, pp. 402–420, 2025.
+[4] S. Wu, J. Wang, Z. Yan, G. Song, Y. Chen, Q. Ma, M. Deng, Y. Wu,
+Y. Zhao, Z. Guo et al., “Monitoring tree-crown scale autumn leaf
+phenology in a temperate forest with an integration of PlanetScope
+and drone remote sensing observations,” ISPRS J. Photogramm. Remote
+Sens., vol. 171, pp. 36–48, 2021.
+[5] Q. Zhu, F. Wang, S. Chen, D. Peng, Q. Yi, L. He, and Z. Liu,
+“Improved corn phenology monitoring using translation and weighting of
+characteristic points from time-series vegetation index,” Comput. Electron.
+Agric., vol. 234, p. 110297, 2025.
+[6] Z. Zhu and C. E. Woodcock, “Continuous change detection and
+classification of land cover using all available Landsat data,” Remote
+Sens. Environ., vol. 144, pp. 152–171, 2014.
+[7] H. J. Tollerud, Z. Zhu, K. Smith, D. F. Wellington, R. A. Hussain, and
+D. Viola, “Toward consistent change detection across irregular remote
+sensing time series observations,” Remote Sens. Environ., vol. 285, p.
+113372, 2023.
+[8] M. G. Tulbure, M. Broich, V. Perin, M. Gaines, J. Ju, S. V. Stehman,
+T. Pavelsky, J. G. Masek, S. Yin, J. Mai et al., “Can we detect more
+ephemeral floods with higher density harmonized Landsat Sentinel 2 data
+compared to Landsat 8 alone?” ISPRS J. Photogramm. Remote Sens.,
+vol. 185, pp. 232–246, 2022.
+[9] Y. Zhao and Y. Ban, “Near real-time wildfire progression mapping with
+VIIRS time-series and autoregressive SwinUNETR,” Int. J. Appl. Earth
+Observ. Geoinf., vol. 136, p. 104358, 2025.
+[10] C. Justice, J. Townshend, E. Vermote, E. Masuoka, R. Wolfe, N. Saleous,
+D. Roy, and J. Morisette, “An overview of MODIS Land data processing
+and product status,” Remote Sens. Environ., vol. 83, no. 1-2, pp. 3–15,
+2002.
+[11] H. Shen, X. Li, Q. Cheng, C. Zeng, G. Yang, H. Li, and L. Zhang,
+“Missing information reconstruction of remote sensing data: A technical
+review,” IEEE Geosci. Remote Sens. Mag., vol. 3, no. 3, pp. 61–85, 2015.
+[12] M. D. King, S. Platnick, W. P. Menzel, S. A. Ackerman, and P. A.
+Hubanks, “Spatial and temporal distribution of clouds observed by
+MODIS onboard the Terra and Aqua satellites,” IEEE Trans. Geosci.
+Remote Sens., vol. 51, no. 7, pp. 3826–3852, 2013.
+[13] D. E. Terasaki Hart, T.-N. B`ui, L. Di Maggio, and I. J. Wang, “Global
+phenology maps reveal the drivers and effects of seasonal asynchrony,”
+Nature, vol. 645, no. 8079, pp. 133–140, 2025.
+[14] Z. Zhang, J. Yan, Y. Liang, J. Feng, H. He, and L. Cao, “Multiscale
+restoration of missing data in optical time-series images with masked
+spatial-temporal attention network,” IEEE Trans. Geosci. Remote Sens.,
+2025.
+
+
+24
+[15] X. Ma, Q. Wang, X. Tong, and P. M. Atkinson, “A deep learning model
+for incorporating temporal information in haze removal,” Remote Sens.
+Environ., vol. 274, p. 113012, 2022.
+[16] Y. Wang, B. Zhang, W. Zhang, D. Hong, B. Zhao, and Z. Li, “Cloud
+removal with SAR-optical data fusion using a unified spatial–spectral
+residual network,” IEEE Trans. Geosci. Remote Sens., vol. 62, pp. 1–20,
+2023.
+[17] X. Li, X. Zhao, F. Wang, and P. Ren, “HF-T2CR: High-fidelity thin
+and thick cloud removal in optical satellite images through SAR fusion,”
+IEEE Trans. Geosci. Remote Sens., vol. 62, pp. 1–13, 2024.
+[18] L. Pan, X. Song, F. Xie, X. Zhang, H. Ji, and Z. Shi, “M3-CR: Multi-
+scale multi-branch mamba for SAR-assisted optical image thick cloud
+removal,” IEEE Trans. Geosci. Remote Sens., 2025.
+[19] Q. Zhang, Q. Yuan, J. Li, Z. Li, H. Shen, and L. Zhang, “Thick cloud
+and cloud shadow removal in multitemporal imagery using progressively
+spatio-temporal patch group deep learning,” ISPRS J. Photogramm.
+Remote Sens., vol. 162, pp. 148–160, 2020.
+[20] C. Stucker, V. S. F. Garnot, and K. Schindler, “U-TILISE: A sequence-to-
+sequence model for cloud removal in optical satellite time series,” IEEE
+Trans. Geosci. Remote Sens., vol. 61, pp. 1–16, 2023.
+[21] Y. Wang, W. Wu, Z. Zhang, Z. Li, F. Zhang, and Q. Xin, “A temporal
+attention-based multi-scale generative adversarial network to fill gaps
+in time series of MODIS data for land surface phenology extraction,”
+Remote Sens. Environ., vol. 318, p. 114546, 2025.
+[22] Q. Zhang, X. Liu, T. Peng, X. Yang, M. Tang, X. Zou, M. Liu, L. Wu,
+and T. Zhang, “U-SeqNet: learning spatiotemporal mapping relationships
+for multimodal multitemporal cloud removal,” GIScience & Remote Sens.,
+vol. 61, no. 1, p. 2330185, 2024.
+[23] S. Liu, H. Chen, K. Tang, Y. Chen, H. Shu, T. Zan, Y. Xue, and
+J. Chen, “Innovative SAR-optical data fusion for reflectance time series
+reconstruction in vegetation-covered regions,” Int. J. Appl. Earth Observ.
+Geoinf., vol. 140, p. 104567, 2025.
+[24] Q. Shu, X. Zhu, S. Xu, Y. Wang, and D. Liu, “RESTORE-DiT: Reliable
+satellite image time series reconstruction by multimodal sequential
+diffusion transformer,” Remote Sens. Environ., vol. 328, p. 114872, 2025.
+[25] K. Tang, X. Chen, T. Liu, A. Li, Y. Tang, P. Yang, and J. Chen,
+“AnytimeFormer: Fusing irregular and asynchronous SAR-optical time
+series to reconstruct reflectance at any given time,” Remote Sens. Environ.,
+vol. 333, p. 115120, 2026.
+[26] J. Krijger, M. Van Weele, I. Aben, and R. Frey, “The effect of sensor
+resolution on the number of cloud-free observations from space,” Atmos.
+Chem. Phys., vol. 7, no. 11, pp. 2881–2891, 2007.
+[27] Z. Men, P. Wang, C. Li, J. Chen, W. Liu, and Y. Fang, “High-temporal-
+resolution high-spatial-resolution spaceborne sar based on continuously
+varying prf,” Sensors, vol. 17, no. 8, p. 1700, 2017.
+[28] M. Schmitt and X. X. Zhu, “Data fusion and remote sensing: An ever-
+growing relationship,” IEEE Geosci. Remote Sens. Mag., vol. 4, no. 4,
+pp. 6–23, 2016.
+[29] G. Liu, J. Qiu, J. Huang, and Y. Yuan, “GLGF-CR: A Gated Local-
+Global Fusion approach for cloud removal in real-world remote sensing,”
+Pattern Recognit., p. 112319, 2025.
+[30] B. Hou, Y. Li, X. Dang, J. Wang, Q. Zhao, H. Qu, Y. Yang, X. Chen, and
+B. Jiang, “ACA-Net: Adaptive cloud-aware network for remote sensing
+image thick cloud removal,” Expert Syst. Appl., p. 129859, 2025.
+[31] B. Suseno, G. Brunel, H. Wijayanto, K. Sadik, F. Afendi, and B. Tisseyre,
+“Reconstructing satellite temporal series data under cloudy conditions:
+Application in predicting rice growth phases,” Smart Agric. Technol., p.
+101378, 2025.
+[32] C. Zhang, F. Wang, X. Zhang, M. Wang, F. Chen, and X. Wu, “Cloud
+removal in remote sensing images using the G2R framework and
+SSMamba,” Remote Sens. Environ., vol. 337, p. 115321, 2026.
+[33] C. Zhang, F. Wang, X. Zhang, M. Wang, F. Chen, X. Wu, and W. Ma,
+“TSSMamba: A temporal–spectral–spatial state space model for multi-
+temporal remote sensing cloud removal,” Int. J. Appl. Earth Observ.
+Geoinf., vol. 146, p. 105131, 2026.
+[34] C. Requena-Mesa, V. Benson, M. Reichstein, J. Runge, and J. Denzler,
+“EarthNet2021: A large-scale dataset and challenge for earth surface
+forecasting as a guided video prediction task.” in Proc. IEEE/CVF Conf.
+Comput. Vis. Pattern Recognit. Workshops (CVPRW), 2021, pp. 1132–
+1142.
+[35] P. Ebel, Y. Xu, M. Schmitt, and X. X. Zhu, “SEN12MS-CR-TS: A
+remote-sensing data set for multimodal multitemporal cloud removal,”
+IEEE Trans. Geosci. Remote Sens., vol. 60, pp. 1–14, 2022.
+[36] V. S. F. Garnot, L. Landrieu, and N. Chehata, “Multi-modal temporal
+attention models for crop mapping from satellite time series,” ISPRS J.
+Photogramm. Remote Sens., vol. 187, pp. 294–305, 2022.
+[37] H. Zhou, C.-H. Kao, C. P. Phoo, U. Mall, B. Hariharan, and K. Bala,
+“AllClear: A comprehensive dataset and benchmark for cloud removal in
+satellite imagery,” Adv. Neural Inf. Process. Syst. (NeurIPS), vol. 37, pp.
+53 571–53 597, 2024.
+[38] W. R. Tobler, “A computer movie simulating urban growth in the Detroit
+region,” Econ. Geogr., vol. 46, no. sup1, pp. 234–240, 1970.
+[39] R. E. Rossi, J. L. Dungan, and L. R. Beck, “Kriging in the shadows:
+geostatistical interpolation for remote sensing,” Remote Sens. Environ.,
+vol. 49, no. 1, pp. 32–40, 1994.
+[40] R. Sibson, “A brief description of natural neighbour interpolation,” in
+Interpreting Multivariate Data.
+John Wiley & Sons, 1981, pp. 21–36.
+[41] R. Franke, “Scattered data interpolation: tests of some methods,” Math.
+Comput., vol. 38, no. 157, pp. 181–200, 1982.
+[42] R. C. Hardie, K. J. Barnard, and E. E. Armstrong, “Joint MAP registration
+and high-resolution image estimation using a sequence of undersampled
+images,” IEEE Trans. Image Process., vol. 6, no. 12, pp. 1621–1633,
+1997.
+[43] Q. Cheng, H. Shen, L. Zhang, and P. Li, “Inpainting for remotely sensed
+images with a multichannel nonlocal total variation model,” IEEE Trans.
+Geosci. Remote Sens., vol. 52, no. 1, pp. 175–187, 2013.
+[44] A. Criminisi, P. P´erez, and K. Toyama, “Region filling and object removal
+by exemplar-based image inpainting,” IEEE Trans. Image Process., vol. 13,
+no. 9, pp. 1200–1212, 2004.
+[45] K. He and J. Sun, “Image completion approaches using the statistics of
+similar patches,” IEEE Trans. Pattern Anal. Mach. Intell., vol. 36, no. 12,
+pp. 2423–2435, 2014.
+[46] M. Bertalmio, G. Sapiro, V. Caselles, and C. Ballester, “Image inpainting,”
+in Proc. 27th Annu. Conf. Comput. Graph. Interact. Tech., 2000, pp.
+417–424.
+[47] P. S. Beck, C. Atzberger, K. A. Høgda, B. Johansen, and A. K. Skidmore,
+“Improved monitoring of vegetation dynamics at very high latitudes: A
+new method using MODIS NDVI,” Remote Sens. Environ., vol. 100,
+no. 3, pp. 321–334, 2006.
+[48] P. Scaramuzza and J. Barsi, “Landsat 7 scan line corrector-off gap-filled
+product development,” in Proc. Pecora, vol. 16, 2005, pp. 23–27.
+[49] C. Zeng, H. Shen, and L. Zhang, “Recovering missing pixels for Landsat
+ETM+ SLC-off imagery using multi-temporal regression analysis and a
+regularization method,” Remote Sens. Environ., vol. 131, pp. 182–194,
+2013.
+[50] X. Li, H. Shen, L. Zhang, H. Zhang, Q. Yuan, and G. Yang, “Recovering
+quantitative remote sensing products contaminated by thick clouds and
+shadows using multitemporal dictionary learning,” IEEE Trans. Geosci.
+Remote Sens., vol. 52, no. 11, pp. 7086–7098, 2014.
+[51] J. Chen, X. Zhu, J. E. Vogelmann, F. Gao, and S. Jin, “A simple and
+effective method for filling gaps in Landsat ETM+ SLC-off images,”
+Remote Sens. Environ., vol. 115, no. 4, pp. 1053–1064, 2011.
+[52] X. Zhu, F. Gao, D. Liu, and J. Chen, “A modified neighborhood similar
+pixel interpolator approach for removing thick clouds in Landsat images,”
+IEEE Geosci. Remote Sens. Lett., vol. 9, no. 3, pp. 521–525, 2012.
+[53] X. Li, H. Shen, H. Li, and L. Zhang, “Patch matching-based multitemporal
+group sparse representation for the missing information reconstruction of
+remote-sensing images,” IEEE J. Sel. Topics Appl. Earth Observ. Remote
+Sens., vol. 9, no. 8, pp. 3629–3641, 2016.
+[54] M. K.-P. Ng, Q. Yuan, L. Yan, and J. Sun, “An adaptive weighted tensor
+completion method for the recovery of remote sensing images with
+missing data,” IEEE Trans. Geosci. Remote Sens., vol. 55, no. 6, pp.
+3367–3381, 2017.
+[55] B. Chen, B. Huang, L. Chen, and B. Xu, “Spatially and temporally
+weighted regression: A novel method to produce continuous cloud-free
+Landsat imagery,” IEEE Trans. Geosci. Remote Sens., vol. 55, no. 1, pp.
+27–37, 2017.
+[56] X. Xiao, S. Boles, J. Liu, D. Zhuang, S. Frolking, C. Li, W. Salas, and
+B. Moore III, “Mapping paddy rice agriculture in southern China using
+multi-temporal MODIS images,” Remote Sens. Environ., vol. 95, no. 4,
+pp. 480–492, 2005.
+[57] Y. Yang, P. Xiao, X. Feng, and H. Li, “Accuracy assessment of seven
+global land cover datasets over China,” ISPRS J. Photogramm. Remote
+Sens., vol. 125, pp. 156–173, 2017.
+[58] C. Small, “The Landsat ETM+ spectral mixing space,” Remote Sens.
+Environ., vol. 93, no. 1, pp. 1–17, 2004.
+[59] Y. Xia, W. He, Q. Huang, G. Yin, W. Liu, and H. Zhang, “CRformer:
+Multi-modal data fusion to reconstruct cloud-free optical imagery,” Int.
+J. Appl. Earth Observ. Geoinf., vol. 128, p. 103793, 2024.
+[60] L.-C. Chen, G. Papandreou, I. Kokkinos, K. Murphy, and A. L. Yuille,
+“Deeplab: Semantic image segmentation with deep convolutional nets,
+atrous convolution, and fully connected crfs,” IEEE Trans. Pattern Anal.
+Mach. Intell., vol. 40, no. 4, pp. 834–848, 2017.
+
+
+25
+[61] J. Jia, H. Yu, C. Wang, K. Zheng, J. Li, and J. Hu, “Spectral-spatial
+collaborative pretraining framework with multi-constraint cooperation
+for hyperspectral-multispectral image fusion,” IEEE J. Sel. Topics Appl.
+Earth Observ. Remote Sens., 2025.
+[62] S. Woo, J. Park, J.-Y. Lee, and I. S. Kweon, “Cbam: Convolutional block
+attention module,” in Proc. Eur. Conf. Comput. Vis. (ECCV), 2018, pp.
+3–19.
+[63] Y. Wu, Z. Peng, Y. Hu, R. Wang, and T. Xu, “A dual-branch network for
+crop-type mapping of scattered small agricultural fields in time series
+remote sensing images,” Remote Sens. Environ., vol. 316, p. 114497,
+2025.
+[64] X. Shi, Z. Chen, H. Wang, D.-Y. Yeung, W.-K. Wong, and W.-c.
+Woo, “Convolutional LSTM network: A machine learning approach
+for precipitation nowcasting,” Adv. Neural Inf. Process. Syst., vol. 28,
+2015.
+[65] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neural
+Comput., vol. 9, no. 8, pp. 1735–1780, 1997.
+[66] Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli, “Image quality
+assessment: from error visibility to structural similarity,” IEEE Trans.
+Image Process., vol. 13, no. 4, pp. 600–612, 2004.
+[67] Q. Huynh-Thu and M. Ghanbari, “Scope of validity of PSNR in
+image/video quality assessment,” Electron. Lett., vol. 44, no. 13, pp.
+800–801, 2008.
+[68] K. Pearson, “VII. Note on regression and inheritance in the case of two
+parents,” Proc. Roy. Soc. London, vol. 58, no. 347-352, pp. 240–242,
+1895.
+[69] F. A. Kruse, A. B. Lefkoff, J. W. Boardman, K. B. Heidebrecht,
+A. Shapiro, P. Barloon, and A. F. Goetz, “The spectral image pro-
+cessing system (SIPS)—interactive visualization and analysis of imaging
+spectrometer data,” Remote Sens. Environ., vol. 44, no. 2-3, pp. 145–163,
+1993.
+[70] T. Chai and R. R. Draxler, “Root mean square error (RMSE) or
+mean absolute error (MAE)?–arguments against avoiding RMSE in the
+literature,” Geosci. Model Dev., vol. 7, no. 3, pp. 1247–1250, 2014.
+[71] X. Liang, Q. Liu, J. Wang, S. Chen, and P. Gong, “Global 500 m seamless
+dataset (2000–2022) of land surface reflectance generated from MODIS
+products,” Earth Syst. Sci. Data, vol. 16, pp. 177–200, 2024.

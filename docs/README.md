@@ -48,7 +48,7 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-10-19</span>
+      <span class="dpr-home-dashboard-kicker">2026-10-20</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
     <strong class="dpr-home-dashboard-count">共 1 篇</strong>
@@ -58,7 +58,7 @@
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-19 22:57:08 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-20 22:04:36 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,7 +69,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日仅速读 1 篇论文，重点看深度学习用于印度安得拉邦戈达瓦里地区人工林制图。这篇论文得分 6.0/10，核心价值在于遥感与深度学习结合、服务林业资源调查，但证据强度一般，适合当方法参考。普通读者可先浏览摘要和实验区数据，再判断是否值得精读全文。</p>
+<p>今天速读 1 篇、精读 0 篇，重点关注 MODIS 地表反射率时间序列重建。</p>
+<p>最值得看的是 LC-TSRNet 如何用土地覆盖信息引导两阶段网络完成年度 MODIS 地表反射率时间序列重建（6.0/10）。</p>
+<p>建议普通读者先看摘要、方法流程和验证部分，再判断该方法是否适合自己的遥感数据场景。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -94,7 +96,7 @@
     <strong class="dpr-home-dashboard-count">1 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India">Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction">LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction</span></li></ul>
   </div>
   <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">transit-lucc <strong>1</strong></span></div>
 </section>

@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-20",
+  "date": "2026-10-20",
+  "generated_at": "2026-10-20T22:04:38",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202610/20/2610.25120v1-lc-tsrnet-a-land-cover-guided-two-stage-network-for-annual-modis-surface-reflectance-time-series-reconstruction",
+      "section": "quick",
+      "title_en": "LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction",
+      "authors": "Wenjuan Zhang, Xuesong Ma, Zhen Li, Meixiang Wang, Caimeng Yi, Jie Pan, Nan Su, Bing Zhang",
+      "date": "2026-10-18",
+      "pdf": "https://arxiv.org/pdf/2610.25120v1",
+      "score": "6.0",
+      "evidence": "土地利用覆盖引导的MODIS地表反射率时间序列重建",
+      "tldr": "MODIS地表反射率产品受云污染和传感器故障影响存在缺失，现有光学或SAR辅助方法受粗分辨率和空间匹配限制。本文提出LC-TSRNet，引入年度土地覆盖先验，设计CSPM提供光谱约束，并用SMRM与3DAM融合多尺度时空上下文和跨维联合约束。构建AIRMOD-TSR数据集，实验显示重建精度和光谱保真度优于对比方法，PSNR提升0.56 dB、SAM降低0.13°。结果验证了植被监测应用价值。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "MODIS surface reflectance (SR) products often suffer from data gaps due to cloud contamination and sensor malfunctions, limiting their applications in long-term and large-scale studies. Most existing methods rely on cloud-free observations from optical time series or introduce SAR time series as auxiliary information. However, due to the coarse spatial resolution of MODIS, cloud-free reference images are difficult to obtain, and SAR imagery is not well matched to the spatial resolution of MODIS, making it difficult to provide effective prior constraints. To address these issues, this study proposes LC-TSRNet for seamless reconstruction of annual MODIS SR products. In the first stage, an annual land cover map is introduced as prior knowledge, and CSPM is designed by leveraging the spectral similarity within identical land cover types, thereby providing prior spectral constraints for missing regions. In the second stage, to address large-area, persistent, and overlapping gaps in MODIS imagery, SMRM is designed to adaptively exploit and integrate multi-scale spatiotemporal contextual information. Meanwhile, to address the limited collaborative utilization of spatio-temporal-spectral information, 3DAM is designed to impose cross-dimensional joint constraints. Considering the lack of publicly available MODIS sample datasets, this study constructs the AIRMOD-TSR dataset. Extensive experimental results show that LC-TSRNet outperforms the comparison methods and achieves better reconstruction accuracy and spectral fidelity. Under the spatially adjacent scenario, LC-TSRNet improves PSNR by 0.56 dB and reduces SAM by 0.13°. The vegetation monitoring application further verifies the practical value of the reconstructed SR time series.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

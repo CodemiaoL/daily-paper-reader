@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-10-20 <!--dpr-date:20261020-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/20/2610.25120v1-lc-tsrnet-a-land-cover-guided-two-stage-network-for-annual-modis-surface-reflectance-time-series-reconstruction" data-sidebar-item="{&quot;title&quot;: &quot;LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.25120v1-lc-tsrnet-a-land-cover-guided-two-stage-network-for-annual-modis-surface-reflectance-time-series-reconstruction&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;土地利用覆盖引导的MODIS地表反射率时间序列重建&quot;}">LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction</a>
   * 2026-10-19 <!--dpr-date:20261019-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/19/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india" data-sidebar-item="{&quot;title&quot;: &quot;Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.22415v1-deep-learning-for-forest-plantation-mapping-in-godavari-districts-of-andhra-pradesh-india&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;transit-lucc&quot;}], &quot;evidence&quot;: &quot;用深度学习遥感制图刻画人工林的土地覆被与土地利用变化&quot;}">Deep Learning for Forest Plantation Mapping in Godavari Districts of Andhra Pradesh, India</a>

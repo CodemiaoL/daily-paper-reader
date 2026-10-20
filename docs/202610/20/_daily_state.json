@@ -1,0 +1,25 @@
+{
+  "date": "20261020",
+  "date_label": "",
+  "generated_at": "2026-10-20 22:04:36 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.25120v1",
+      "route": "202610/20/2610.25120v1-lc-tsrnet-a-land-cover-guided-two-stage-network-for-annual-modis-surface-reflectance-time-series-reconstruction",
+      "title": "LC-TSRNet: A Land-Cover-Guided Two-Stage Network for Annual MODIS Surface Reflectance Time Series Reconstruction",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "土地利用覆盖引导的MODIS地表反射率时间序列重建",
+      "first_seen_at": "2026-10-20 22:04:36 UTC",
+      "updated_at": "2026-10-20 22:04:36 UTC"
+    }
+  ]
+}
