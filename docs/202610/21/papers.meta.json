@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-21",
+  "date": "2026-10-21",
+  "generated_at": "2026-10-21T22:07:09",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202610/21/2610.27793v1-terranostra-bench-benchmarking-spatial-downscaling-and-temporal-rollout-for-global-1-km-land-use-reconstruction",
+      "section": "quick",
+      "title_en": "TerraNostra-Bench: Benchmarking Spatial Downscaling and Temporal Rollout for Global 1-km Land-Use Reconstruction",
+      "authors": "Amirpasha Mozaffari, Marina Castaño, Stefano Materia, Joan Vedrí, Jordi Varela-Agrelo, Dario Garcia-Gasulla, Etienne Tourigny, Mario Acosta, Amanda Duarte",
+      "date": "2026-10-20",
+      "pdf": "https://arxiv.org/pdf/2610.27793v1",
+      "score": "7.0",
+      "evidence": "土地利用变化重建与变化感知评估",
+      "tldr": "针对地球系统模型中地表表示不完善导致陆地碳循环不确定性，论文将高分辨率土地利用重建视为语义分割任务，融合粗分辨率情景、气候分类与静态地球物理特征生成1公里年尺度土地利用图。提出TerraNostra-Bench，将空间降尺度与自回归时间推演分开，并聚焦稀有变化像素评估。实验显示自回归先验信息量最大但13年误差累积更严重，非自回归更稳健，且可通过推理阈值与训练权重调节。该基准为时间连续土地利用产品提供方法基础与评估面。",
+      "tags": "query:transit-lucc",
+      "abstract_en": "Uncertainty in the terrestrial carbon cycle remains a major constraint in climate projections, partly due to imperfect land surface representations in Earth system models. We propose a data-driven framework for high-resolution land-use reconstruction, treated as a semantic-segmentation task, that combines coarse-resolution scenario data and climate classification with static geophysical features to produce annual land-use maps at 1 km resolution. We introduce TerraNostra-Bench, a change-aware evaluation protocol that separates spatial downscaling from autoregressive temporal rollout and scores models on the rare land-use-change pixels rather than the dominant static background. Using it, we compare convolutional (U-Net) and transformer (Swin) backbones in autoregressive and non-autoregressive schemes against persistence, linear, and shallow convolutional baselines. The autoregressive prior is the most informative input yet accumulates error over long rollouts: autoregressive models lose 5.7-7.2 accuracy points over 13 years, against 2.2-2.8 for non-autoregressive models. This trade-off is governed by the autoregressive choice rather than the backbone. It can be tuned by an inference-time prior-trust threshold that requires no retraining and by the training-time weighting of reconstruction and change objectives; the two levers trace complementary frontiers, with calibration recovering up to 10 accuracy points while keeping change sensitivity above the persistence floor. Extrapolating beyond the training window, backward to 1955-1959 and forward to 2015-2019 under scenario forcing, the models retain most of their in-window skill and show the same trade-off, indicating it is intrinsic to the design. This work provides the methodological foundation and evaluation surface for a forthcoming temporally continuous land-use product.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,25 @@
+{
+  "date": "20261021",
+  "date_label": "",
+  "generated_at": "2026-10-21 22:07:07 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.27793v1",
+      "route": "202610/21/2610.27793v1-terranostra-bench-benchmarking-spatial-downscaling-and-temporal-rollout-for-global-1-km-land-use-reconstruction",
+      "title": "TerraNostra-Bench: Benchmarking Spatial Downscaling and Temporal Rollout for Global 1-km Land-Use Reconstruction",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "transit-lucc"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "土地利用变化重建与变化感知评估",
+      "first_seen_at": "2026-10-21 22:07:07 UTC",
+      "updated_at": "2026-10-21 22:07:07 UTC"
+    }
+  ]
+}

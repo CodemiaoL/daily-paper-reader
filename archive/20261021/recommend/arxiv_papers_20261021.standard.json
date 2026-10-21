@@ -1,0 +1,61 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-21T22:06:45.363566+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.27793v1",
+      "source": "arxiv",
+      "title": "TerraNostra-Bench: Benchmarking Spatial Downscaling and Temporal Rollout for Global 1-km Land-Use Reconstruction",
+      "abstract": "Uncertainty in the terrestrial carbon cycle remains a major constraint in climate projections, partly due to imperfect land surface representations in Earth system models. We propose a data-driven framework for high-resolution land-use reconstruction, treated as a semantic-segmentation task, that combines coarse-resolution scenario data and climate classification with static geophysical features to produce annual land-use maps at 1 km resolution. We introduce TerraNostra-Bench, a change-aware evaluation protocol that separates spatial downscaling from autoregressive temporal rollout and scores models on the rare land-use-change pixels rather than the dominant static background. Using it, we compare convolutional (U-Net) and transformer (Swin) backbones in autoregressive and non-autoregressive schemes against persistence, linear, and shallow convolutional baselines. The autoregressive prior is the most informative input yet accumulates error over long rollouts: autoregressive models lose 5.7-7.2 accuracy points over 13 years, against 2.2-2.8 for non-autoregressive models. This trade-off is governed by the autoregressive choice rather than the backbone. It can be tuned by an inference-time prior-trust threshold that requires no retraining and by the training-time weighting of reconstruction and change objectives; the two levers trace complementary frontiers, with calibration recovering up to 10 accuracy points while keeping change sensitivity above the persistence floor. Extrapolating beyond the training window, backward to 1955-1959 and forward to 2015-2019 under scenario forcing, the models retain most of their in-window skill and show the same trade-off, indicating it is intrinsic to the design. This work provides the methodological foundation and evaluation surface for a forthcoming temporally continuous land-use product.",
+      "authors": [
+        "Amirpasha Mozaffari",
+        "Marina Castaño",
+        "Stefano Materia",
+        "Joan Vedrí",
+        "Jordi Varela-Agrelo",
+        "Dario Garcia-Gasulla",
+        "Etienne Tourigny",
+        "Mario Acosta",
+        "Amanda Duarte"
+      ],
+      "primary_category": "physics.ao-ph",
+      "categories": [
+        "physics.ao-ph",
+        "cs.LG"
+      ],
+      "published": "2026-10-20T07:55:23+00:00",
+      "link": "https://arxiv.org/pdf/2610.27793v1",
+      "tags": [
+        "keyword:transit-lucc",
+        "query:transit-lucc"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "land-use change reconstruction and change-aware evaluation",
+      "llm_evidence_cn": "土地利用变化重建与变化感知评估",
+      "llm_evidence": "土地利用变化重建与变化感知评估",
+      "canonical_evidence": "土地利用变化重建与变化感知评估",
+      "llm_tldr_en": "Proposes data-driven 1-km land-use reconstruction and TerraNostra-Bench to evaluate spatial downscaling and temporal rollout, focusing on rare land-use-change pixels.",
+      "llm_tldr_cn": "针对地球系统模型中地表表征不完善的问题，该研究提出数据驱动的1公里分辨率土地利用重建框架，将重建视为语义分割任务，并结合粗分辨率情景数据、气候分类与静态地理特征生成年度土地利用图。作者构建TerraNostra-Bench变化感知评测协议，分离空间降尺度与自回归时间推演，并在稀少的土地利用变化像素上评价模型。结果表明该基准能更有效地比较模型对土地利用变化的捕捉能力，为高分辨率土地覆盖变化分析提供工具。",
+      "llm_tldr": "针对地球系统模型中地表表征不完善的问题，该研究提出数据驱动的1公里分辨率土地利用重建框架，将重建视为语义分割任务，并结合粗分辨率情景数据、气候分类与静态地理特征生成年度土地利用图。作者构建TerraNostra-Bench变化感知评测协议，分离空间降尺度与自回归时间推演，并在稀少的土地利用变化像素上评价模型。结果表明该基准能更有效地比较模型对土地利用变化的捕捉能力，为高分辨率土地覆盖变化分析提供工具。",
+      "llm_tags": [
+        "query:transit-lucc"
+      ],
+      "matched_query_tag": "query:transit-lucc",
+      "matched_query_text": "land cover change detection and analysis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
